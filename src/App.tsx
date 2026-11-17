@@ -4,6 +4,7 @@ import * as motion from 'motion/react-m';
 import { domAnimation, LazyMotion, MotionConfig, useReducedMotion } from 'motion/react';
 import SiteHeader from './components/SiteHeader';
 import OpeningScreen from './components/OpeningScreen';
+import CursorBubble from './components/cursor-bubble';
 import ScrollChoreography from './components/ScrollChoreography';
 import SiteFooter from './components/SiteFooter';
 import { editorialEase, PrimaryButton } from './components/ui';
@@ -15,6 +16,7 @@ const About = lazy(() => import('./pages/About'));
 const ForSellers = lazy(() => import('./pages/ForSellers'));
 const ForBuyers = lazy(() => import('./pages/ForBuyers'));
 const Contact = lazy(() => import('./pages/Contact'));
+const ThankYou = lazy(() => import('./pages/ThankYou'));
 
 function RouteEffects() {
   const location = useLocation();
@@ -35,6 +37,11 @@ function RouteEffects() {
     setMeta('meta[name="description"]', metadata.description);
     setMeta('meta[property="og:title"]', metadata.title);
     setMeta('meta[property="og:description"]', metadata.description);
+    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    if (location.pathname === '/thank-you') {
+      if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.append(robots); }
+      robots.content = 'noindex, follow';
+    } else robots?.remove();
     const siteUrl = import.meta.env.VITE_SITE_URL;
     if (siteUrl) {
       try {
@@ -43,7 +50,7 @@ function RouteEffects() {
         if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.append(canonical); }
         canonical.href = url;
         setMeta('meta[property="og:url"]', url);
-        setMeta('meta[property="og:image"]', new URL('/images/katrina-portrait.jpg', siteUrl).href);
+        setMeta('meta[property="og:image"]', new URL('/images/katrina-portrait.png', siteUrl).href);
       } catch { /* Canonical links wait for a valid, confirmed public domain. */ }
     }
   }, [location.pathname]);
@@ -83,6 +90,7 @@ function SiteLayout() {
   return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <OpeningScreen />
+    <CursorBubble />
     <SiteHeader />
     <RouteEffects />
     <ScrollChoreography />
@@ -96,6 +104,7 @@ function SiteLayout() {
           <Route path="/for-sellers" element={<ForSellers />} />
           <Route path="/for-buyers" element={<ForBuyers />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           <Route path="*" element={<section className="container not-found"><p className="eyebrow">A DIFFERENT DIRECTION</p><h1>Let's find your way home.</h1><p>This page isn't here, but your next chapter is still ahead.</p><PrimaryButton to="/">Return Home</PrimaryButton></section>} />
         </Routes>
         </PageTransition>

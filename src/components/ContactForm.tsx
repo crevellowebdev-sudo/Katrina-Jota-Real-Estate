@@ -1,13 +1,15 @@
 import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useInquiryDraft } from '../context/InquiryContext';
 import { business } from '../data/site';
-import { submitInquiry, validateInquiry, type InquiryAdapter, type InquiryErrors, type InquiryValues } from '../lib/inquiry';
+import { emptyInquiry, submitInquiry, validateInquiry, type InquiryAdapter, type InquiryErrors, type InquiryValues } from '../lib/inquiry';
 
 type FieldName = keyof InquiryValues;
 
 export default function ContactForm({ adapter }: { adapter?: InquiryAdapter }) {
-  const { draft, setDraft } = useInquiryDraft();
+  const { draft, setDraft, setInquiryAccepted } = useInquiryDraft();
+  const navigate = useNavigate();
   const [errors, setErrors] = useState<InquiryErrors>({});
   const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
@@ -37,6 +39,11 @@ export default function ContactForm({ adapter }: { adapter?: InquiryAdapter }) {
       setErrors(result.errors);
       focusFirstError(result.errors);
       setStatus('Please check the highlighted details.');
+    } else if (result.status === 'sent') {
+      setInquiryAccepted(true);
+      // Preserve any edits made while the accepted inquiry was being sent.
+      setDraft(current => current === draft ? emptyInquiry : current);
+      navigate('/thank-you', { replace: true });
     } else setStatus(result.message);
     setSending(false);
   };

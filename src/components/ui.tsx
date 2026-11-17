@@ -33,6 +33,46 @@ export function ScrollReveal({ children, className = '', delay = 0 }: { children
   return <div className={className} data-scroll-reveal data-reveal-delay={delay}>{children}</div>;
 }
 
+export function TextReveal({ children, className = '', delay = 0 }: {
+  children: ReactNode; className?: string; delay?: number;
+}) {
+  const reduceMotion = useReducedMotion();
+  return <motion.div
+    className={className}
+    initial={reduceMotion ? false : { opacity: 0, y: 26 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true, amount: 0.25 }}
+    transition={{ duration: 0.72, delay, ease: editorialEase }}
+  >
+    {children}
+  </motion.div>;
+}
+
+export function ImageReveal({ children, className = '', delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+  const reduceMotion = useReducedMotion();
+  if (reduceMotion) return <div className={`image-reveal ${className}`}>{children}</div>;
+  return <motion.div
+    className={`image-reveal ${className}`}
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true, amount: 0.2 }}
+  >
+    <motion.div
+      className="image-reveal-clip"
+      variants={{ hidden: { clipPath: 'inset(0 0 100% 0)' }, visible: { clipPath: 'inset(0 0 0% 0)' } }}
+      transition={{ duration: 1, delay, ease: editorialEase }}
+    >
+      <motion.div
+        className="image-reveal-media"
+        variants={{ hidden: { scale: 1.07 }, visible: { scale: 1 } }}
+        transition={{ duration: 1.35, delay, ease: editorialEase }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  </motion.div>;
+}
+
 export function EditorialImage({ src, alt, className = '', priority = false, parallax = false, sizes = '(max-width: 700px) calc(100vw - 46px), 44vw' }: {
   src: string; alt: string; className?: string; priority?: boolean; parallax?: boolean; sizes?: string;
 }) {
@@ -56,17 +96,21 @@ export function EditorialImage({ src, alt, className = '', priority = false, par
   </div>;
 }
 
-export function PageHero({ eyebrow, title, description, image, alt, cta, to = '/contact', variant = 'buying' }: {
-  eyebrow?: string; title: ReactNode; description?: string; image: string; alt: string; cta?: string; to?: string; variant?: 'selling' | 'buying';
+export function PageHero({ eyebrow, title, description, image, alt, cta, to = '/contact', variant = 'buying', reveal = false }: {
+  eyebrow?: string; title: ReactNode; description?: string; image: string; alt: string; cta?: string; to?: string; variant?: 'selling' | 'buying'; reveal?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 160]);
+  const clipReveal = reveal && !reduceMotion;
   return <section ref={heroRef} className={`page-hero page-hero--${variant}`}>
-    <motion.div className="page-hero-media" style={{ y: reduceMotion ? 0 : imageY }}>
+    <motion.div className="page-hero-media" style={{ y: reduceMotion ? 0 : imageY }}
+      initial={clipReveal ? { clipPath: 'inset(0 0 100% 0)' } : false}
+      animate={clipReveal ? { clipPath: 'inset(0 0 0% 0)' } : undefined}
+      transition={{ duration: 1.15, ease: editorialEase }}>
     <motion.img className="page-hero-image" src={image} srcSet={image.endsWith('.webp') ? `${image.replace('.webp', '-640.webp')} 640w, ${image.replace('.webp', '-960.webp')} 960w, ${image} 1600w` : undefined} sizes="100vw" alt={alt}
-      width={1200} height={800} fetchPriority="high" initial={reduceMotion ? false : { scale: 1.035 }} animate={{ scale: 1 }} transition={{ duration: 1.2, ease: editorialEase }} />
+      width={1200} height={800} fetchPriority="high" initial={reduceMotion ? false : { scale: clipReveal ? 1.08 : 1.035 }} animate={{ scale: 1 }} transition={{ duration: clipReveal ? 1.4 : 1.2, ease: editorialEase }} />
     </motion.div>
     <div className="page-hero-shade" />
     <motion.div className="container page-hero-content" initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: editorialEase }}>

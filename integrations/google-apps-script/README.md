@@ -31,18 +31,18 @@ If an old server is still running, stop it with Ctrl+C before starting `npm run 
 
 ## Email design
 
-An ivory masthead, deep-green introduction, fine gold rules, readable field summaries, visitor message, Gmail reply button, and Katrina's verified phone/location. All seven existing form fields are included. The recipient is fixed to **rozelramos17@gmail.com** and Reply-To uses the validated visitor email. No automatic email is sent to the visitor.
+An ivory masthead, deep-green introduction, fine gold rules, readable field summaries, visitor message, Gmail reply button, and Katrina's verified phone/location. All seven existing form fields are included. The recipient is fixed to **rozelramos17@gmail.com** and Reply-To uses the validated visitor email. A separate acknowledgment is sent to the validated visitor email, with Reply-To set to `keysbykatrinaj@gmail.com`. It includes the selected timeline and explains that an inquiry does not confirm an appointment. Each new inquiry requires quota for two recipients.
 
 The template names Cormorant Garamond and DM Sans and uses Georgia/Arial fallbacks because Gmail and other email clients may not support custom fonts. It uses inline styles, presentation tables, and a plain-text alternative. Client rendering can vary; check a real Gmail and Outlook email before launch.
 
-`email-preview.html` is a local design preview with clearly labeled sample data. It does not send anything. The actual email can use the original logo through `LOGO_URL`; no replacement mark has been drawn.
+`email-preview.html` and `visitor-email-preview.html` are local design previews with clearly labeled sample data. They do not send anything. Both outgoing emails embed a 480px derivative of the supplied `public/images/logo.png` using MailApp inline images; no public image URL or `LOGO_URL` property is needed. The logo data is included in `Code.gs`, so deploying that single file includes the branding.
 
 ## 1. Set up Google Apps Script
 
 1. Open https://script.google.com/ and create a new project under the Google account that should send the inquiry notifications.
 2. Replace `Code.gs` with the contents of the adjacent `Code.gs` file.
 3. Open **Project Settings > Script properties**. Add `INQUIRY_SECRET`, a random string of at least 32 characters. Generate one locally using `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`. Keep it private.
-4. Optionally add `LOGO_URL` with the full HTTPS URL to the website's original `logo-original.png`. Leave this unset until the real site URL is known. The default header is a plain company label, not a replacement logo. Email clients can block remote images.
+4. The supplied `logo.png` is embedded in `Code.gs`. Existing `LOGO_URL` properties are no longer used for outgoing messages. The brand name remains in the plain-text alternative and image alt text.
 5. Select `authorizeMail` and click **Run**. Authorize mail sending for the account. This function sends no email.
 6. Choose **Deploy > New deployment > Web app**. Set **Execute as: Me** and **Who has access: Anyone**. Save the `/exec` URL. The handler still requires the secret. If your Workspace policy prevents this access setting, an administrator must enable an appropriate deployment.
 7. After editing the script, update the deployment to a new version through **Deploy > Manage deployments**.
@@ -89,8 +89,16 @@ Adapt the import path to the file that contains the adapter. Before enabling the
 
 ## Verification
 
-Run `node scripts/test-google-apps-script.mjs` locally. It uses mocked Google services, sends no email, checks validation, fixed-recipient behavior, HTML escaping, quota/failure responses, deduplication, and relay behavior, and regenerates the local preview. Real Google authorization, deployment, email delivery, and Gmail/Outlook rendering require testing after deployment.
+Run `node scripts/test-google-apps-script.mjs` locally. It uses mocked Google services, sends no email, checks validation, fixed-recipient behavior, HTML escaping, two-recipient quota checks, visitor confirmation, embedded branding, partial-send retry behavior, deduplication, and relay behavior, and regenerates the local preview. Real Google authorization, deployment, email delivery, and Gmail/Outlook rendering require testing after deployment.
 
-On a timeout, a send may already have been accepted. Repeating identical form values within 24 hours returns the previous acceptance while the ledger is intact. Sending and saving the ledger are separate operations: a rare property-write failure after sending can allow a duplicate on retry. The script does not claim exactly-once delivery.
+Owner and visitor acceptance are tracked separately using hashes and flags. If the visitor acknowledgment fails after the owner email succeeds, retrying the same inquiry sends only the missing visitor email. On a timeout, a send may already have been accepted. Repeating identical form values within 24 hours returns the previous acceptance while the ledger is intact. Sending and saving the ledger are separate operations: a rare property-write failure after sending can allow a duplicate on retry. The script does not claim exactly-once delivery.
 
 References: [Google web app deployment](https://developers.google.com/apps-script/guides/web), [MailApp HTML email and Reply-To](https://developers.google.com/apps-script/reference/mail/mail-app), [Content Service redirects](https://developers.google.com/apps-script/guides/content).
+
+## Visitor confirmation and requested reminders
+
+Replace the deployed `Code.gs` with the updated file and deploy a new version to activate visitor confirmations. These changes exist locally until redeployed; automated checks send no real email. Both messages use the existing Google sender account, with the public business email as the visitor acknowledgment Reply-To.
+
+Reminder scheduling is awaiting clarification. The website collects a buying/selling timeframe, not a confirmed booking date: ?As soon as possible,? ?Within 3 months,? ?Within 6 months,? or ?More than 6 months.? No appointment or reminder dates are inferred from those choices. The owner must choose between reminders before an actual consultation date (requiring date/time collection and confirmation) and follow-ups 1 and 7 days after submission. No reminder trigger is installed by this update.
+
+The embedded logo uses [MailApp inlineImages](https://developers.google.com/apps-script/reference/mail/mail-app#sendEmail(Object)). Future scheduled reminders will require an [installable time-driven trigger](https://developers.google.com/apps-script/guides/triggers/installable#time-driven_triggers) and storage of the recipient and scheduled dates.

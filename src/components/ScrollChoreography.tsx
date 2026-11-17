@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useReducedMotion } from 'motion/react';
 
 // Progressive enhancement: elements are visible before, during and after observation.
-const targets = '[data-scroll-reveal], main h1, main h2, main .section-heading, main p, .about-portrait, .selling-image-frame, .editorial-image, .form-field, .form-actions, .footer-main > div, .footer-bottom, .asset-disclosure';
+const targets = '[data-scroll-reveal], main h1, main h2, main h3, main .section-heading, main p, .about-portrait, .selling-image-frame, .editorial-image, .form-field, .form-actions, .footer-main > div, .footer-bottom, .asset-disclosure';
 
 export default function ScrollChoreography() {
   const { pathname } = useLocation();
@@ -43,7 +43,7 @@ export default function ScrollChoreography() {
       }
       document.querySelectorAll<HTMLElement>(targets).forEach(element => {
         // Keep the sticky buyer image steady instead of replaying fades at viewport edges.
-        if (observed.has(element) || element.closest('[data-introduction-motion], [data-buying-timeline], [data-story-scroll], .home-hero, .page-hero, .buying-process-aside, [role="alert"], [role="status"]')) return;
+        if (observed.has(element) || element.closest('[data-introduction-motion], [data-page-motion], [data-buying-timeline], [data-story-scroll], .image-reveal, .home-hero, .page-hero, .buying-process-aside, [role="alert"], [role="status"]')) return;
         // Animate a composition once, rather than stacking transforms on its children.
         if (element.parentElement?.closest('[data-scroll-reveal], .section-heading, .form-field, .footer-main > div')) return;
         if (element.matches('.field-error, .form-status')) return;

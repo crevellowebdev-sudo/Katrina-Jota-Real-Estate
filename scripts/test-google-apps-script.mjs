@@ -11,6 +11,7 @@ let properties;
 let emails;
 let quota;
 let sendFails;
+let visitorFails;
 let locked;
 const context = vm.createContext({
   PropertiesService: { getScriptProperties: () => ({
@@ -24,13 +25,15 @@ const context = vm.createContext({
   }) },
   MailApp: {
     getRemainingDailyQuota: () => quota,
-    sendEmail: message => { if (sendFails) throw new Error('Mock mail failure'); emails.push(message); },
+    sendEmail: message => { if (sendFails || (visitorFails && message.to === sample.email)) throw new Error('Mock mail failure'); emails.push(message); },
   },
   Utilities: {
     DigestAlgorithm: { SHA_256: 'sha256' },
     Charset: { UTF_8: 'utf8' },
     computeDigest: (_, value) => createHash('sha256').update(value).digest(),
     base64EncodeWebSafe: value => Buffer.from(value).toString('base64url'),
+    base64Decode: value => Buffer.from(value, 'base64'),
+    newBlob: (bytes, contentType, name) => ({ bytes, contentType, name }),
     formatDate: () => 'November 16, 2026, 9:00 AM EST (sample)',
   },
   ContentService: {
@@ -47,7 +50,7 @@ const sample = {
 };
 const reset = () => {
   properties = new Map([['INQUIRY_SECRET', secret]]);
-  emails = []; quota = 100; sendFails = false; locked = false;
+  emails = []; quota = 100; sendFails = false; visitorFails = false; locked = false;
 };
 const post = overrides => context.doPost({ postData: { contents: JSON.stringify({ secret, ...sample, ...overrides }) } });
 reset();
@@ -71,15 +74,25 @@ for (const invalid of [
 assert.equal(emails.length, 0);
 
 assert.equal(post({ to: 'attacker@example.com' }).ok, true);
-assert.equal(emails.length, 1);
+assert.equal(emails.length, 2);
 assert.equal(emails[0].to, 'rozelramos17@gmail.com');
 assert.equal(emails[0].replyTo, sample.email);
 assert.ok(emails[0].body.includes(sample.message));
 assert.ok(emails[0].htmlBody.includes('mail.google.com/mail/?view=cm'));
 assert.ok(emails[0].htmlBody.includes('#024D2C'));
+assert.equal(emails[1].to, sample.email);
+assert.equal(emails[1].replyTo, 'keysbykatrinaj@gmail.com');
+assert.ok(emails[1].body.includes(sample.timeline));
+assert.ok(emails[1].body.includes('not an appointment'));
+for (const mail of emails) {
+  assert.ok(mail.htmlBody.includes('cid:katrinaLogo'));
+  assert.equal(mail.inlineImages.katrinaLogo.name, 'logo.png');
+  assert.equal(mail.inlineImages.katrinaLogo.contentType, 'image/png');
+  assert.equal(mail.inlineImages.katrinaLogo.bytes.subarray(1, 4).toString(), 'PNG');
+}
 assert.equal(locked, false);
 assert.equal(post().duplicate, true);
-assert.equal(emails.length, 1);
+assert.equal(emails.length, 2);
 assert.ok(!properties.get('INQUIRY_SENDS').includes(sample.email));
 
 reset();
@@ -89,6 +102,21 @@ assert.ok(!emails[0].htmlBody.includes('<script>'));
 assert.ok(!emails[0].htmlBody.includes('<img src=x'));
 assert.ok(emails[0].htmlBody.includes('&lt;script&gt;'));
 assert.ok(emails[0].body.includes(unsafe));
+assert.ok(!emails[1].htmlBody.includes('<img src=x'));
+assert.ok(emails[1].htmlBody.includes('&lt;img'));
+reset(); quota = 1;
+assert.equal(post().code, 'LIMIT_REACHED');
+assert.equal(emails.length, 0);
+reset(); visitorFails = true;
+assert.equal(post().code, 'SEND_FAILED');
+assert.equal(emails.length, 1);
+assert.equal(emails[0].to, 'rozelramos17@gmail.com');
+visitorFails = false; quota = 1;
+assert.equal(post().ok, true);
+assert.equal(emails.length, 2);
+assert.equal(emails[1].to, sample.email);
+assert.equal(post().duplicate, true);
+assert.equal(emails.length, 2);
 reset(); quota = 0;
 assert.equal(post().code, 'LIMIT_REACHED');
 assert.equal(emails.length, 0);
@@ -99,7 +127,7 @@ assert.equal(properties.has('INQUIRY_SENDS'), false);
 reset();
 for (let index = 0; index < 30; index++) assert.equal(post({ message: `Different message ${index}` }).ok, true);
 assert.equal(post({ message: 'Over the rolling limit' }).code, 'LIMIT_REACHED');
-assert.equal(emails.length, 30);
+assert.equal(emails.length, 60);
 
 const env = { SITE_ORIGIN: 'https://example.com', INQUIRY_SECRET: secret, APPS_SCRIPT_URL: 'https://script.google.com/macros/s/test-deployment/exec' };
 const request = (data = sample, origin = env.SITE_ORIGIN) => new Request('https://example.com/api/inquiry', {
@@ -191,7 +219,8 @@ try {
   globalThis.fetch = originalFetch;
 }
 
-const preview = context.renderInquiryEmail_(sample, 'November 16, 2026, 9:00 AM EST (sample)', 'https://preview.invalid/logo-original.png')
-  .replace('https://preview.invalid/logo-original.png', '../../public/images/logo-original.png');
+const preview = context.renderInquiryEmail_(sample, 'November 16, 2026, 9:00 AM EST (sample)', 'https://preview.invalid/logo.png')
+  .replace('https://preview.invalid/logo.png', '../../public/images/logo.png');
 await fs.writeFile('integrations/google-apps-script/email-preview.html', preview);
+await fs.writeFile('integrations/google-apps-script/visitor-email-preview.html', context.renderVisitorEmail_(sample, 'https://preview.invalid/logo.png').replace('https://preview.invalid/logo.png', '../../public/images/logo.png'));
 console.log('Apps Script, relay, Vercel handler, and browser adapter checks passed. No email sent. Local email preview regenerated.');

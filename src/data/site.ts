@@ -20,6 +20,10 @@ export const business = {
 };
 
 export const pageMetadata: Record<string, { title: string; description: string }> = {
+  '/thank-you': {
+    title: 'Thank You | Katrina Jota Real Estate',
+    description: 'Thank you for starting a conversation with Katrina Jota Real Estate.',
+  },
   '/': {
     title: 'Refined Real Estate | Katrina Jota Real Estate',
     description: "Expert guidance for the GTA's most discerning buyers and sellers. I provide a personal, warm approach to real estate, ensuring your journey is as seamless as your home.",

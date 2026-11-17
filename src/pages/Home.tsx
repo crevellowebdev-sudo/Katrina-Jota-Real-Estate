@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useMotionValueEvent, useScroll, useTransform } from 'motion/react';
 import ScrollExpansionVideo, { useHeroReducedMotion } from '../components/scroll-expansion-hero';
 import * as motion from 'motion/react-m';
-import { editorialEase, PrimaryButton } from '../components/ui';
+import { editorialEase, ImageReveal, PrimaryButton, TextReveal } from '../components/ui';
 
 function HomeHero() {
   const reduceMotion = useHeroReducedMotion();
@@ -50,11 +50,15 @@ export default function Home() {
     <section ref={introductionRef} data-introduction-motion className="home-introduction-section" aria-labelledby="introduction-heading">
       <div className="container home-introduction">
         <motion.div className="introduction-portrait" style={{ y: reduced ? 0 : portraitY }}>
-          <img src="/images/katrina-portrait.jpg" alt="Katrina Jota" width={377} height={504} loading="lazy" decoding="async" />
+          <ImageReveal>
+            <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={377} height={504} loading="lazy" decoding="async" />
+          </ImageReveal>
         </motion.div>
         <motion.div className="introduction-copy" style={{ y: reduced ? 0 : copyY }}>
-          <h2 id="introduction-heading">Your next move in the GTA starts with <em>Katrina J.</em></h2>
-          <p>With over 15 years of expertise in corporate and commercial real estate, I bring a refined and personal approach to every transaction. My journey has been defined by a commitment to excellence and a deep understanding of the Toronto market. I combine authoritative market knowledge with a warm, trustworthy atmosphere to ensure your property journey is as seamless as it is successful.</p>
+          <TextReveal>
+            <h2 id="introduction-heading">Your next move in the GTA starts with <em>Katrina J.</em></h2>
+            <p>With over 15 years of expertise in corporate and commercial real estate, I bring a refined and personal approach to every transaction. My journey has been defined by a commitment to excellence and a deep understanding of the Toronto market. I combine authoritative market knowledge with a warm, trustworthy atmosphere to ensure your property journey is as seamless as it is successful.</p>
+          </TextReveal>
         </motion.div>
       </div>
     </section>

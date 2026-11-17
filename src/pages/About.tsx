@@ -1,4 +1,4 @@
-import { ScrollReveal, SectionHeading } from '../components/ui';
+import { ImageReveal, ScrollReveal, SectionHeading } from '../components/ui';
 import { expertise } from '../data/site';
 import FlowArt, { FlowSection } from '../components/story-scroll';
 
@@ -8,7 +8,11 @@ export default function About() {
       <header className="about-title">
         <h1 id="about-heading">The Katrina Jota <em>Story</em></h1>
       </header>
-      <figure className="about-portrait"><img src="/images/katrina-portrait.jpg" alt="Katrina Jota" width={377} height={504} fetchPriority="high" decoding="async" /></figure>
+      <figure className="about-portrait">
+        <ImageReveal>
+          <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={377} height={504} fetchPriority="high" decoding="async" />
+        </ImageReveal>
+      </figure>
       <ScrollReveal className="biography-copy">
         <p>Katrina’s journey in real estate began with a deep-rooted passion for the Toronto landscape. Her career spans over 15 years in the corporate world, where she honed her analytical skills and strategic vision. This foundation provided the perfect backdrop for her transition into a licensed real estate agent, where she now brings a unique blend of professional authority and a personal, warm approach to every client interaction.</p>
       </ScrollReveal>

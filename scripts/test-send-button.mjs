@@ -23,8 +23,13 @@ try {
     });
     await page.goto(`${process.env.BASE_URL || 'http://127.0.0.1:5173'}/contact`);
     const button = page.getByRole('button', { name: 'Send Inquiry', exact: true });
+    const clickSend = async () => {
+      await button.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await page.waitForTimeout(800);
+      await button.click();
+    };
     await expect(button).toBeEnabled();
-    await button.click();
+    await clickSend();
     await expect(page.getByText('Please enter your full name.', { exact: true })).toBeVisible();
     assert.equal(submissions, 0);
     await page.getByLabel('Full name').fill('Local regression test');
@@ -34,7 +39,7 @@ try {
     await page.getByLabel('Preferred area').fill('Toronto');
     await page.getByLabel('Timeline', { exact: true }).selectOption('Within 3 months');
     await page.getByLabel('Message', { exact: true }).fill('Mocked button test; no email sent.');
-    await button.click();
+    await clickSend();
     await expect(page.getByRole('button', { name: 'Sending...', exact: true })).toBeDisabled();
     await expect.poll(() => typeof release).toBe('function');
     release();
@@ -43,13 +48,27 @@ try {
     await expect(page.getByLabel('Full name')).toHaveValue('Local regression test');
     await button.focus();
     await page.keyboard.press('Enter');
-    await expect(page.getByRole('status')).toContainText('accepted for sending');
-    await expect(button).toBeEnabled();
+    await expect(page).toHaveURL(/\/thank-you$/);
+    await expect(page.getByRole('heading', { name: 'Thank you.', exact: true })).toBeVisible();
+    await expect(page.getByText('Your inquiry has been accepted for sending to Katrina.', { exact: true })).toBeVisible();
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, follow');
+    await expect(page.locator('.page-transition')).toHaveCSS('opacity', '1');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.screenshot({ path: `.verification/thank-you-${width}.png` });
+    await page.getByRole('link', { name: 'Return Home', exact: true }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    await page.locator('footer a[href="/contact"]').click();
+    await expect(page.getByLabel('Full name')).toHaveValue('');
+    // Opening a confirmation URL without this session's acceptance redirects safely.
+    await page.goto(`${process.env.BASE_URL || 'http://127.0.0.1:5173'}/thank-you`);
+    await expect(page).toHaveURL(/\/contact$/);
+    await expect(page.getByRole('heading', { name: 'Thank you.', exact: true })).toHaveCount(0);
     assert.equal(submissions, 2);
     assert.equal(readinessChecks, 0);
     await page.close();
   }
-  console.log('Send Inquiry works by mouse and keyboard on mobile and desktop; validates fields, disables only during sending, and re-enables after failure/success. Setup readiness cannot block clicks. All requests mocked; no email sent.');
+  console.log('Mobile and desktop: validation, pending state, failure recovery, confirmed thank-you navigation, cleared draft, return link, metadata and direct-visit guard pass. All requests mocked; no email sent.');
 } finally {
   await browser.close();
 }

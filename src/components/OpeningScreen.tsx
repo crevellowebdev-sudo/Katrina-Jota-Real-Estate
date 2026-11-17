@@ -12,7 +12,8 @@ export default function OpeningScreen() {
     const dismiss = () => setVisible(false);
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
     const onPreference = () => { if (media.matches) dismiss(); };
-    const timer = window.setTimeout(dismiss, 1550);
+    // Fallback only: normal dismissal follows the CSS exit animation.
+    const timer = window.setTimeout(dismiss, 2200);
     // Immediately uncover the page when the visitor starts interacting.
     window.addEventListener('keydown', dismiss, { once: true });
     window.addEventListener('pointerdown', dismiss, { once: true, passive: true });
@@ -28,9 +29,11 @@ export default function OpeningScreen() {
   }, [visible]);
 
   if (!visible) return null;
-  return <div className="opening-screen" aria-hidden="true">
+  return <div className="opening-screen" aria-hidden="true" onAnimationEnd={event => {
+    if (event.target === event.currentTarget && event.animationName === 'opening-curtain') setVisible(false);
+  }}>
     <div className="opening-screen-brand">
-      <img src="/images/logo-original.png" alt="" width={1334} height={385} fetchPriority="high" onError={() => setVisible(false)} />
+      <img src="/images/logo-transparent.png" alt="" width={2142} height={734} fetchPriority="high" onError={() => setVisible(false)} />
       <span className="opening-screen-rule" />
     </div>
   </div>;
