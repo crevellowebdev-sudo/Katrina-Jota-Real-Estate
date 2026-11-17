@@ -51,7 +51,7 @@ export default function Home() {
       <div className="container home-introduction">
         <motion.div className="introduction-portrait" style={{ y: reduced ? 0 : portraitY }}>
           <ImageReveal>
-            <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={377} height={504} loading="lazy" decoding="async" />
+            <img src="/images/p.jpg" alt="Katrina Jota" width={1600} height={2400} loading="lazy" decoding="async" />
           </ImageReveal>
         </motion.div>
         <motion.div className="introduction-copy" style={{ y: reduced ? 0 : copyY }}>

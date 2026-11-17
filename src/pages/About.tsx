@@ -1,6 +1,5 @@
 import { ImageReveal, ScrollReveal, SectionHeading } from '../components/ui';
 import { expertise } from '../data/site';
-import FlowArt, { FlowSection } from '../components/story-scroll';
 
 export default function About() {
   return <>
@@ -10,7 +9,7 @@ export default function About() {
       </header>
       <figure className="about-portrait">
         <ImageReveal>
-          <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={377} height={504} fetchPriority="high" decoding="async" />
+          <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={1365} height={2048} fetchPriority="high" decoding="async" />
         </ImageReveal>
       </figure>
       <ScrollReveal className="biography-copy">
@@ -21,18 +20,21 @@ export default function About() {
       </ScrollReveal>
     </section>
 
-    <section className="expertise-story expertise-story--unified" aria-labelledby="expertise-heading">
-      <FlowArt aria-label="Expertise and credentials">
-        <FlowSection index={1} className="expertise-green-panel" aria-label="Expertise and credentials">
-          <div className="container expertise-layout">
-            <SectionHeading><span id="expertise-heading">Expertise &amp; Credentials</span></SectionHeading>
-            <div className="expertise-grid">{expertise.map((item, index) => <div key={item.title} className="expertise-item">
+    <section className="expertise-story expertise-editorial" aria-labelledby="expertise-heading">
+      <div className="container">
+        <SectionHeading className="expertise-editorial-heading"><span id="expertise-heading">Expertise &amp; Credentials</span></SectionHeading>
+        <div className="expertise-layout">
+          <figure className="expertise-editorial-photo">
+            <ImageReveal>
+              <img src="/images/h.jpg" alt="An illustrative aerial view of a residential neighbourhood with detached homes and tree-lined surroundings" width={1600} height={1997} loading="lazy" decoding="async" />
+            </ImageReveal>
+          </figure>
+          <div className="expertise-grid">{expertise.map((item, index) => <ScrollReveal key={item.title} className="expertise-item">
               <span className="expertise-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
               <h3>{item.title}</h3><p>{item.description}</p>
-            </div>)}</div>
-          </div>
-        </FlowSection>
-      </FlowArt>
+          </ScrollReveal>)}</div>
+        </div>
+      </div>
     </section>
 
   </>;

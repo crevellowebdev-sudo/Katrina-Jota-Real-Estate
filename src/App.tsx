@@ -5,6 +5,7 @@ import { domAnimation, LazyMotion, MotionConfig, useReducedMotion } from 'motion
 import SiteHeader from './components/SiteHeader';
 import OpeningScreen from './components/OpeningScreen';
 import CursorBubble from './components/cursor-bubble';
+import BackToTop from './components/BackToTop';
 import ScrollChoreography from './components/ScrollChoreography';
 import SiteFooter from './components/SiteFooter';
 import { editorialEase, PrimaryButton } from './components/ui';
@@ -50,7 +51,7 @@ function RouteEffects() {
         if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.append(canonical); }
         canonical.href = url;
         setMeta('meta[property="og:url"]', url);
-        setMeta('meta[property="og:image"]', new URL('/images/katrina-portrait.png', siteUrl).href);
+        setMeta('meta[property="og:image"]', new URL('/images/p.jpg', siteUrl).href);
       } catch { /* Canonical links wait for a valid, confirmed public domain. */ }
     }
   }, [location.pathname]);
@@ -111,6 +112,7 @@ function SiteLayout() {
       </Suspense>
     </main>
     <SiteFooter />
+    <BackToTop />
   </>;
 }
 

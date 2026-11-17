@@ -29,7 +29,7 @@ export default function ForSellers() {
       <div className="container seller-closing-frame">
         <div className="seller-closing-image" aria-hidden="true">
           <ImageReveal className="seller-closing-image-reveal">
-            <img src="/images/details.webp" srcSet="/images/details-640.webp 640w, /images/details-960.webp 960w, /images/details.webp 1200w" sizes="(max-width: 700px) calc(100vw - 52px), 36vw" alt="" width={1200} height={800} loading="lazy" decoding="async" />
+            <img src="/images/c.jpg" alt="" width={1600} height={2134} loading="lazy" decoding="async" />
           </ImageReveal>
         </div>
         <ScrollReveal className="seller-closing-copy">

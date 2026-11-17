@@ -20,7 +20,7 @@ export default function ForBuyers() {
       <div className="buying-journey">
         <div className="buying-process-aside">
           <ImageReveal>
-            <EditorialImage src="/images/details.webp" alt="Thoughtful interior details with a decorative vase and mirror in a warm, minimalist home" />
+            <EditorialImage src="/images/n.jpg" alt="An illustrative contemporary home with floor-to-ceiling glass, illuminated rooflines, and a landscaped pool at dusk" width={1600} height={2106} />
           </ImageReveal>
         </div>
         <Timeline steps={buyingSteps} />

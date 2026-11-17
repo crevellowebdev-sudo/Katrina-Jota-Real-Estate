@@ -73,8 +73,8 @@ export function ImageReveal({ children, className = '', delay = 0 }: { children:
   </motion.div>;
 }
 
-export function EditorialImage({ src, alt, className = '', priority = false, parallax = false, sizes = '(max-width: 700px) calc(100vw - 46px), 44vw' }: {
-  src: string; alt: string; className?: string; priority?: boolean; parallax?: boolean; sizes?: string;
+export function EditorialImage({ src, alt, className = '', priority = false, parallax = false, width = 1200, height = 800, sizes = '(max-width: 700px) calc(100vw - 46px), 44vw' }: {
+  src: string; alt: string; className?: string; priority?: boolean; parallax?: boolean; width?: number; height?: number; sizes?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduceMotion = useReducedMotion();
@@ -83,11 +83,11 @@ export function EditorialImage({ src, alt, className = '', priority = false, par
   return <div ref={ref} className={`editorial-image ${parallax && !reduceMotion ? 'editorial-image--parallax' : ''} ${className}`}>
     <motion.img
       src={src}
-      srcSet={`${src.replace('.webp', '-640.webp')} 640w, ${src.replace('.webp', '-960.webp')} 960w, ${src} 1200w`}
-      sizes={sizes}
+      srcSet={src.endsWith('.webp') ? `${src.replace('.webp', '-640.webp')} 640w, ${src.replace('.webp', '-960.webp')} 960w, ${src} 1200w` : undefined}
+      sizes={src.endsWith('.webp') ? sizes : undefined}
       alt={alt}
-      width={1200}
-      height={800}
+      width={width}
+      height={height}
       loading={priority ? 'eager' : 'lazy'}
       fetchPriority={priority ? 'high' : 'auto'}
       decoding="async"
