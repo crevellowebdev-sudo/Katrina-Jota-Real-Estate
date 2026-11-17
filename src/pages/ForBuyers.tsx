@@ -6,8 +6,8 @@ export default function ForBuyers() {
   return <div className="buyers-page" data-page-motion>
     <PageHero
       title="For Buyers"
-      image="/images/buyers-hero.webp"
-      alt="A character-filled red-brick home surrounded by the greenery of a Toronto neighbourhood"
+      image="/images/buyers-hero.jpg"
+      alt="An illustrative contemporary home with stone cladding, large windows, and a broad driveway at dusk"
       reveal
     />
     <section className="container buying-process">

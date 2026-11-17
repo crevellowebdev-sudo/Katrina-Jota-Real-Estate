@@ -89,7 +89,7 @@ main:focus { outline: none; }
 .hero-description { color: var(--muted); max-width: 390px; margin-top: 30px; }
 .hero-actions { margin-top: 36px; }
 .home-hero-media { position: relative; min-width: 0; overflow: hidden; margin: 28px 28px 28px 0; background: #e7e4da; }
-.home-hero-media img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 78% center; }
+.home-hero-media img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; object-position: 60% center; }
 .home-introduction-section { background: white; border-top: 1px solid var(--border); }
 .home-introduction { max-width: 1120px; display: grid; grid-template-columns: 340px minmax(0, 1fr); align-items: center; gap: clamp(60px, 9vw, 130px); padding-block: clamp(88px, 9vw, 132px); }
 .introduction-portrait { position: relative; padding: 0 20px 20px 0; isolation: isolate; }
@@ -137,7 +137,7 @@ main:focus { outline: none; }
 .page-hero--selling h1 { position: relative; display: inline-block; min-width: 34%; padding: 38px 60px 42px 32px; background: var(--color-ivory); }
 .page-hero--selling h1::after { content: ''; position: absolute; left: 0; top: 38px; bottom: 42px; width: 1px; background: var(--color-gold); }
 .page-hero--buying { min-height: 480px; align-items: end; }
-.page-hero--buying .page-hero-image { object-position: center 58%; }
+.page-hero--buying .page-hero-image { object-position: center top; transform-origin: center top; }
 .page-hero--buying .page-hero-content { padding-block: 0; }
 .page-hero--buying h1 { display: inline-block; padding: 38px 60px 42px 0; min-width: 34%; position: relative; color: var(--color-green); background: var(--color-ivory); }
 .page-hero--buying h1::before { content: ''; position: absolute; inset: 0 100% 0 auto; width: var(--gutter); background: var(--color-ivory); }
@@ -337,7 +337,7 @@ main:focus { outline: none; }
   .hero-actions { margin-top: 28px; }
   .hero-actions .primary-button { width: 100%; max-width: 360px; padding-inline: 20px; gap: 16px; }
   .home-hero-media { margin: 0 var(--gutter) 26px; aspect-ratio: 1.12; }
-  .home-hero-media img { object-position: right center; }
+  .home-hero-media img { object-position: 60% center; }
   .home-introduction { grid-template-columns: 1fr; gap: 38px; padding-block: 64px 72px; }
   .introduction-portrait { width: 80%; max-width: 310px; }
   .introduction-copy h2 { max-width: 420px; }
@@ -629,7 +629,7 @@ main:focus { outline: none; }
 
 /* The original hero image stays in place; video expands only inside it. */
 .home-expansion-video { position: absolute; inset: 0; overflow: hidden; }
-.home-expansion-video > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.home-expansion-video > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; transform: scale(1.2); transform-origin: center; }
 .home-video-control { position: absolute; z-index: 2; right: 16px; bottom: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 16px; background: var(--color-primary); color: white; border: 1px solid white; font-size: 16px; }
 .home-video-control:hover { background: var(--color-primary-hover); }
 .home-video-control:focus-visible { outline-color: white; }
@@ -650,5 +650,21 @@ main:focus { outline: none; }
 
 /* The Sellers and Buyers hero photographs drift down as the page scrolls. */
 .page-hero-media { position: absolute; inset: -160px 0 0; z-index: -3; }
+.page-hero--buying .page-hero-media { inset: 0 0 -160px; }
 .page-hero-media .page-hero-image { z-index: auto; }
 @media (prefers-reduced-motion: reduce) { .page-hero-media { transform: none !important; } }
+
+/* Independent scale keeps hover motion separate from scroll and entrance transforms. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  main img, .brand-logo {
+    scale: 1;
+    transition: scale .7s var(--ease);
+  }
+  .home-hero-media:hover img,
+  .image-reveal:hover img,
+  .editorial-image:hover img,
+  .page-hero:hover .page-hero-image {
+    scale: 1.035;
+  }
+  .brand-wordmark:hover .brand-logo { scale: 1.015; }
+}

@@ -32,7 +32,7 @@ function HomeHero() {
         </motion.div>
       </motion.div>
     </div>
-    <motion.div className="home-hero-media" aria-hidden="true" style={reduceMotion ? { opacity: 1, y: 0 } : { opacity: imageOpacity, y: imageY }}><motion.img src="/images/home-editorial.webp" srcSet="/images/home-editorial-640.webp 640w, /images/home-editorial.webp 1280w" sizes="(max-width: 700px) calc(100vw - 52px), 54vw" alt="" width={1672} height={941} fetchPriority="high" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .9, delay: .15, ease: editorialEase }} /></motion.div>
+    <motion.div className="home-hero-media" aria-hidden="true" style={reduceMotion ? { opacity: 1, y: 0 } : { opacity: imageOpacity, y: imageY }}><motion.img src="/images/home-hero.jpg" alt="" width={1600} height={1066} fetchPriority="high" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .9, delay: .15, ease: editorialEase }} /></motion.div>
     </div>
     <ScrollExpansionVideo target={heroRef} />
     </div>

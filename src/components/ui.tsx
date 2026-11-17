@@ -109,7 +109,7 @@ export function PageHero({ eyebrow, title, description, image, alt, cta, to = '/
       initial={clipReveal ? { clipPath: 'inset(0 0 100% 0)' } : false}
       animate={clipReveal ? { clipPath: 'inset(0 0 0% 0)' } : undefined}
       transition={{ duration: 1.15, ease: editorialEase }}>
-    <motion.img className="page-hero-image" src={image} srcSet={image.endsWith('.webp') ? `${image.replace('.webp', '-640.webp')} 640w, ${image.replace('.webp', '-960.webp')} 960w, ${image} 1600w` : undefined} sizes="100vw" alt={alt}
+    <motion.img className="page-hero-image" src={image} srcSet={/\.(webp|jpe?g)$/i.test(image) ? `${image.replace(/(\.[^.]+)$/, '-640$1')} 640w, ${image.replace(/(\.[^.]+)$/, '-960$1')} 960w, ${image} 1600w` : undefined} sizes="100vw" alt={alt}
       width={1200} height={800} fetchPriority="high" initial={reduceMotion ? false : { scale: clipReveal ? 1.08 : 1.035 }} animate={{ scale: 1 }} transition={{ duration: clipReveal ? 1.4 : 1.2, ease: editorialEase }} />
     </motion.div>
     <div className="page-hero-shade" />
