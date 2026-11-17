@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { business, navigation } from '../data/site';
 import { BrandWordmark } from './SiteHeader';
 import WordmarkRevealFooter from './wordmark-reveal-footer';
@@ -20,6 +20,10 @@ export default function SiteFooter() {
     reveal="inView"
     reflection
   >
+    <nav className="footer-legal" aria-label="Legal information">
+      <Link to="/terms-and-conditions">Terms &amp; Conditions</Link>
+      <Link to="/privacy-policy">Privacy Policy</Link>
+    </nav>
     {business.regulatoryDisclosure && <p className="footer-disclosure">{business.regulatoryDisclosure}</p>}
   </WordmarkRevealFooter>;
 }

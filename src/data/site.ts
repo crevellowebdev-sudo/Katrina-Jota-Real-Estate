@@ -20,29 +20,37 @@ export const business = {
 };
 
 export const pageMetadata: Record<string, { title: string; description: string }> = {
+  '/privacy-policy': {
+    title: 'Privacy Policy | Katrina Jota Real Estate',
+    description: 'Privacy Policy draft for client review, describing the website inquiry and consent process.',
+  },
+  '/terms-and-conditions': {
+    title: 'Terms & Conditions | Katrina Jota Real Estate',
+    description: 'Terms & Conditions draft for client review for the Katrina Jota Real Estate website.',
+  },
   '/thank-you': {
     title: 'Thank You | Katrina Jota Real Estate',
     description: 'Thank you for starting a conversation with Katrina Jota Real Estate.',
   },
   '/': {
-    title: 'Refined Real Estate | Katrina Jota Real Estate',
-    description: "Expert guidance for the GTA's most discerning buyers and sellers. I provide a personal, warm approach to real estate, ensuring your journey is as seamless as your home.",
+    title: 'Toronto & GTA Real Estate | Katrina Jota',
+    description: 'Personal real estate guidance for buyers and sellers in Toronto and the Greater Toronto Area. Book a free consultation with Katrina Jota.',
   },
   '/about': {
-    title: 'The Katrina Jota Story | Toronto & GTA Real Estate',
-    description: 'Katrina’s journey in real estate began with a deep-rooted passion for the Toronto landscape. Her career spans over 15 years in the corporate world, where she honed her analytical skills and strategic vision.',
+    title: 'About Katrina Jota | Toronto & GTA Real Estate',
+    description: 'Meet Katrina Jota and explore her personal approach to buying and selling real estate in Toronto and the Greater Toronto Area.',
   },
   '/for-sellers': {
-    title: 'For Sellers | Katrina Jota Real Estate',
-    description: 'Transforming your property into a high-value asset through a refined and strategic approach.',
+    title: 'Sell Your Home in Toronto & GTA | Katrina Jota',
+    description: 'Explore Katrina Jota’s selling process, from market analysis and staging to negotiation and closing. Request a free evaluation for your GTA home.',
   },
   '/for-buyers': {
-    title: 'For Buyers | Katrina Jota Real Estate',
-    description: 'A clear, professional, and personalized roadmap designed to guide you through every step of your home search and purchase journey.',
+    title: 'Buy a Home in Toronto & GTA | Katrina Jota',
+    description: 'Navigate your Toronto or GTA home search with Katrina Jota, from the initial consultation and market analysis to offers, negotiation, and closing.',
   },
   '/contact': {
-    title: 'Contact | Katrina Jota Real Estate',
-    description: "Whether you are looking to buy, sell, or simply explore the GTA market, I am here to guide you every step of the way. Let's start a conversation.",
+    title: 'Contact Katrina Jota | Toronto & GTA Real Estate',
+    description: 'Contact Katrina Jota to discuss buying or selling a home in Toronto and the GTA. Call (416) 887-5670 or book a free consultation.',
   },
 };
 

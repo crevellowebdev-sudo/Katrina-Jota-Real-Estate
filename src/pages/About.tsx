@@ -5,11 +5,11 @@ export default function About() {
   return <>
     <section className="container about-introduction" aria-labelledby="about-heading">
       <header className="about-title">
-        <h1 id="about-heading">The Katrina Jota <em>Story</em></h1>
+        <h1 id="about-heading">About Katrina Jota</h1>
       </header>
       <figure className="about-portrait">
         <ImageReveal>
-          <img src="/images/katrina-portrait.png" alt="Katrina Jota" width={1365} height={2048} fetchPriority="high" decoding="async" />
+          <img src="/images/katrina-portrait-1365.webp" srcSet="/images/katrina-portrait-480.webp 480w, /images/katrina-portrait-800.webp 800w, /images/katrina-portrait-1365.webp 1365w" sizes="(max-width: 700px) 80vw, 380px" alt="Katrina Jota wearing glasses and a dark blazer, standing with her arms folded" width={1365} height={2048} fetchPriority="high" decoding="async" />
         </ImageReveal>
       </figure>
       <ScrollReveal className="biography-copy">

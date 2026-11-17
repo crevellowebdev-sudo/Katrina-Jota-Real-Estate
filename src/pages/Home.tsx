@@ -1,11 +1,13 @@
 import { useRef, useState } from 'react';
 import { useMotionValueEvent, useScroll, useTransform } from 'motion/react';
-import ScrollExpansionVideo, { useHeroReducedMotion } from '../components/scroll-expansion-hero';
+import ScrollExpansionVideo, { useHeroCompactLayout, useHeroReducedMotion } from '../components/scroll-expansion-hero';
 import * as motion from 'motion/react-m';
 import { editorialEase, ImageReveal, PrimaryButton, TextReveal } from '../components/ui';
 
 function HomeHero() {
   const reduceMotion = useHeroReducedMotion();
+  const compact = useHeroCompactLayout();
+  const staticHero = reduceMotion || compact;
   const heroRef = useRef<HTMLElement>(null);
   const [copyHidden, setCopyHidden] = useState(false);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end end'] });
@@ -19,11 +21,11 @@ function HomeHero() {
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.85, delay: reduceMotion ? 0 : delay, ease: editorialEase },
   });
-  return <section ref={heroRef} className={`home-scroll-scene ${reduceMotion ? '' : 'home-scroll-scene--active'}`} aria-labelledby="home-heading">
+  return <section ref={heroRef} className={`home-scroll-scene ${staticHero ? '' : 'home-scroll-scene--active'}`} aria-labelledby="home-heading">
     <div className="home-scroll-stage">
     <div className="home-hero">
     <div className="container home-hero-inner">
-      <motion.div className="home-hero-copy" inert={!reduceMotion && copyHidden} style={reduceMotion ? { opacity: 1, y: 0 } : { opacity: textOpacity, y: textY }}>
+      <motion.div className="home-hero-copy" inert={!staticHero && copyHidden} style={staticHero ? { opacity: 1, y: 0 } : { opacity: textOpacity, y: textY }}>
         <motion.p className="hero-signature" {...reveal(0.08)}>Katrina Jota</motion.p>
         <motion.h1 id="home-heading" {...reveal(0.18)}>Refined <em>Real Estate</em></motion.h1>
         <motion.p className="hero-description" {...reveal(0.34)}>Expert guidance for the GTA's most discerning buyers and sellers. I provide a personal, warm approach to real estate, ensuring your journey is as seamless as your home.</motion.p>
@@ -32,7 +34,7 @@ function HomeHero() {
         </motion.div>
       </motion.div>
     </div>
-    <motion.div className="home-hero-media" aria-hidden="true" style={reduceMotion ? { opacity: 1, y: 0 } : { opacity: imageOpacity, y: imageY }}><motion.img src="/images/home-hero.jpg" alt="" width={1600} height={1066} fetchPriority="high" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .9, delay: .15, ease: editorialEase }} /></motion.div>
+    <motion.div className="home-hero-media" style={staticHero ? { opacity: 1, y: 0 } : { opacity: imageOpacity, y: imageY }}><motion.img src="/images/home-hero.jpg" srcSet="/images/home-hero-640.jpg 640w, /images/home-hero-960.jpg 960w, /images/home-hero.jpg 1600w" sizes="(max-width: 900px) 90vw, 54vw" alt="Illustrative sunlit living room with large windows, a cream sofa, orange cushions and wood flooring" width={1600} height={1066} fetchPriority="high" initial={reduceMotion ? false : { opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .9, delay: .15, ease: editorialEase }} /></motion.div>
     </div>
     <ScrollExpansionVideo target={heroRef} />
     </div>
@@ -51,7 +53,7 @@ export default function Home() {
       <div className="container home-introduction">
         <motion.div className="introduction-portrait" style={{ y: reduced ? 0 : portraitY }}>
           <ImageReveal>
-            <img src="/images/p.jpg" alt="Katrina Jota" width={1600} height={2400} loading="lazy" decoding="async" />
+            <img src="/images/p.jpg" alt="Hands holding a model house above property paperwork, illustrating guidance through a home purchase" width={1600} height={2400} loading="lazy" decoding="async" />
           </ImageReveal>
         </motion.div>
         <motion.div className="introduction-copy" style={{ y: reduced ? 0 : copyY }}>

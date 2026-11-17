@@ -147,7 +147,17 @@ export function WordmarkRevealFooter({
       const spacing = -.035 * basePx;
       const needed = [...wordmark].reduce((width, letter) => width + context.measureText(letter === ' ' ? '\u00a0' : letter).width, 0) + spacing * wordmark.length;
       const fit = needed > available ? Math.floor(basePx * (available - 4) / needed * 10) / 10 : 0;
-      const descent = Math.round((fit || basePx) * .17 * 10) / 10;
+      // Derive the floor from real glyph ink so descenders (the J in JOTA) are never clipped.
+      const px = fit || basePx;
+      context.font = style.fontWeight + ' ' + px + 'px ' + style.fontFamily;
+      const glyphs = [...wordmark].map(letter => context.measureText(letter === ' ' ? '\u00a0' : letter));
+      const sample = context.measureText(wordmark);
+      const inkDescent = glyphs.reduce((deepest, glyph) => Math.max(deepest, glyph.actualBoundingBoxDescent ?? 0), 0);
+      const fontAscent = sample.fontBoundingBoxAscent ?? px * .9;
+      const fontDescent = sample.fontBoundingBoxDescent ?? px * .25;
+      const halfLeading = (px - (fontAscent + fontDescent)) / 2;
+      const baseline = halfLeading + fontAscent;
+      const descent = Math.round((px - baseline - inkDescent - Math.max(6, px * .05)) * 10) / 10;
       setMetrics(previous => previous.descent === descent && previous.fit === fit ? previous : { descent, fit });
     };
     measure();
@@ -389,6 +399,8 @@ export function WordmarkRevealFooter({
                   style={{
                     transform: hover === i ? "translateY(-6px)" : "translateY(0px)",
                     color: "var(--wm)",
+                    paddingBottom: "0.32em",
+                    marginBottom: "-0.32em",
                     backgroundImage: "linear-gradient(105deg, var(--wm) 0%, var(--wm) 46%, var(--glint) 50%, var(--wm) 54%, var(--wm) 100%)",
                     backgroundSize: "250% 100%",
                     backgroundPosition: "0% 0%",

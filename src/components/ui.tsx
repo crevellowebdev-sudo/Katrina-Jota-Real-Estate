@@ -3,6 +3,7 @@ import { Link, type LinkProps } from 'react-router-dom';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import * as motion from 'motion/react-m';
 import { useReducedMotion, useScroll, useTransform } from 'motion/react';
+import { useHeroCompactLayout } from './scroll-expansion-hero';
 
 export const editorialEase = [0.22, 1, 0.36, 1] as const;
 
@@ -96,21 +97,22 @@ export function EditorialImage({ src, alt, className = '', priority = false, par
   </div>;
 }
 
-export function PageHero({ eyebrow, title, description, image, alt, cta, to = '/contact', variant = 'buying', reveal = false }: {
-  eyebrow?: string; title: ReactNode; description?: string; image: string; alt: string; cta?: string; to?: string; variant?: 'selling' | 'buying'; reveal?: boolean;
+export function PageHero({ eyebrow, title, description, image, alt, cta, to = '/contact', variant = 'buying', reveal = false, imageWidth = 1600, imageHeight = 1066 }: {
+  eyebrow?: string; title: ReactNode; description?: string; image: string; alt: string; cta?: string; to?: string; variant?: 'selling' | 'buying'; reveal?: boolean; imageWidth?: number; imageHeight?: number;
 }) {
   const reduceMotion = useReducedMotion();
+  const compact = useHeroCompactLayout();
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const imageY = useTransform(scrollYProgress, [0, 1], [0, 160]);
   const clipReveal = reveal && !reduceMotion;
   return <section ref={heroRef} className={`page-hero page-hero--${variant}`}>
-    <motion.div className="page-hero-media" style={{ y: reduceMotion ? 0 : imageY }}
+    <motion.div className="page-hero-media" style={{ y: reduceMotion || compact ? 0 : imageY }}
       initial={clipReveal ? { clipPath: 'inset(0 0 100% 0)' } : false}
       animate={clipReveal ? { clipPath: 'inset(0 0 0% 0)' } : undefined}
       transition={{ duration: 1.15, ease: editorialEase }}>
     <motion.img className="page-hero-image" src={image} srcSet={/\.(webp|jpe?g)$/i.test(image) ? `${image.replace(/(\.[^.]+)$/, '-640$1')} 640w, ${image.replace(/(\.[^.]+)$/, '-960$1')} 960w, ${image} 1600w` : undefined} sizes="100vw" alt={alt}
-      width={1200} height={800} fetchPriority="high" initial={reduceMotion ? false : { scale: clipReveal ? 1.08 : 1.035 }} animate={{ scale: 1 }} transition={{ duration: clipReveal ? 1.4 : 1.2, ease: editorialEase }} />
+      width={imageWidth} height={imageHeight} fetchPriority="high" initial={reduceMotion ? false : { scale: clipReveal ? 1.08 : 1.035 }} animate={{ scale: 1 }} transition={{ duration: clipReveal ? 1.4 : 1.2, ease: editorialEase }} />
     </motion.div>
     <div className="page-hero-shade" />
     <motion.div className="container page-hero-content" initial={reduceMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: editorialEase }}>

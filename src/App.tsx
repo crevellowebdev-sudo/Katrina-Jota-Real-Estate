@@ -10,7 +10,7 @@ import ScrollChoreography from './components/ScrollChoreography';
 import SiteFooter from './components/SiteFooter';
 import { editorialEase, PrimaryButton } from './components/ui';
 import { InquiryProvider } from './context/InquiryContext';
-import { pageMetadata } from './data/site';
+import { applyPageSeo, normalizeSiteUrl } from './seo/metadata';
 import Home from './pages/Home';
 
 const About = lazy(() => import('./pages/About'));
@@ -18,6 +18,7 @@ const ForSellers = lazy(() => import('./pages/ForSellers'));
 const ForBuyers = lazy(() => import('./pages/ForBuyers'));
 const Contact = lazy(() => import('./pages/Contact'));
 const ThankYou = lazy(() => import('./pages/ThankYou'));
+const Legal = lazy(() => import('./pages/Legal'));
 
 function RouteEffects() {
   const location = useLocation();
@@ -32,28 +33,7 @@ function RouteEffects() {
   }, []);
 
   useEffect(() => {
-    const metadata = pageMetadata[location.pathname] ?? { title: 'Page Not Found | Katrina Jota Real Estate', description: 'Find your way back to personal real estate guidance in Toronto and the GTA.' };
-    document.title = metadata.title;
-    const setMeta = (selector: string, content: string) => document.querySelector(selector)?.setAttribute('content', content);
-    setMeta('meta[name="description"]', metadata.description);
-    setMeta('meta[property="og:title"]', metadata.title);
-    setMeta('meta[property="og:description"]', metadata.description);
-    let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    if (location.pathname === '/thank-you') {
-      if (!robots) { robots = document.createElement('meta'); robots.name = 'robots'; document.head.append(robots); }
-      robots.content = 'noindex, follow';
-    } else robots?.remove();
-    const siteUrl = import.meta.env.VITE_SITE_URL;
-    if (siteUrl) {
-      try {
-        const url = new URL(location.pathname, siteUrl).href;
-        let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-        if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.append(canonical); }
-        canonical.href = url;
-        setMeta('meta[property="og:url"]', url);
-        setMeta('meta[property="og:image"]', new URL('/images/p.jpg', siteUrl).href);
-      } catch { /* Canonical links wait for a valid, confirmed public domain. */ }
-    }
+    applyPageSeo(location.pathname, normalizeSiteUrl(import.meta.env.VITE_SITE_URL));
   }, [location.pathname]);
 
   useEffect(() => {
@@ -106,6 +86,8 @@ function SiteLayout() {
           <Route path="/for-buyers" element={<ForBuyers />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/privacy-policy" element={<Legal document="privacy" />} />
+          <Route path="/terms-and-conditions" element={<Legal document="terms" />} />
           <Route path="*" element={<section className="container not-found"><p className="eyebrow">A DIFFERENT DIRECTION</p><h1>Let's find your way home.</h1><p>This page isn't here, but your next chapter is still ahead.</p><PrimaryButton to="/">Return Home</PrimaryButton></section>} />
         </Routes>
         </PageTransition>

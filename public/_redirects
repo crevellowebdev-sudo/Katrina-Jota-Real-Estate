@@ -1,1 +1,8 @@
-/* /index.html 200
+/about /about/index.html 200
+/for-sellers /for-sellers/index.html 200
+/for-buyers /for-buyers/index.html 200
+/contact /contact/index.html 200
+/privacy-policy /privacy-policy/index.html 200
+/terms-and-conditions /terms-and-conditions/index.html 200
+/thank-you /thank-you/index.html 200
+/* /404.html 404

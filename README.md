@@ -22,6 +22,8 @@ The approved brand and copy source is `public/Katrina_Jota_Website_Brand_Handoff
 
 ## Before Launch
 
+- Set `VITE_SITE_URL` to the confirmed HTTPS production origin before the final build. Route-specific prerendered HTML, social metadata, canonical URLs, schema, robots and sitemap handling are documented in [docs/seo.md](docs/seo.md).
+
 - The full, original-color logo is served from `public/images/logo-original.png` in the header and on an ivory panel in the footer. It is a lossless PNG conversion of the existing transparent full-logo derivative; no lettering was redrawn or recolored.
 - `public/images/katrina-portrait.jpg` and `approved-sellers.jpg` were extracted directly from pages 2 and 3 of the supplied handoff. Obtain higher-resolution originals for sharper large-screen presentation; the embedded images are 377 × 504 and 407 × 507 pixels.
 - Confirm required contact fields and the submit label before production. The handoff leaves those unspecified; the current form requires name and email and enables `Send Inquiry` when server configuration is present.
@@ -40,7 +42,7 @@ The reusable `submitInquiry` handler validates and awaits the adapter. The adapt
 
 ## Assets
 
-Fonts are self-hosted Cormorant Garamond (600 normal and italic) and DM Sans (400, 500, 600), sourced from Google Fonts under the SIL Open Font License. Home uses `public/images/herovid.mp4` above 700px, muted and looping with a pause control. Mobile, reduced-motion visitors, and video errors use `public/images/hero.jpg`; mobile does not load the video. The handoff portrait appears in Home's introductory story. About pairs an unframed portrait with the approved biography and a green expertise section. Sellers uses the handoff's supplied interior image. Buyers retains illustrative architectural imagery from the existing site. The original licensing/source record for retained architectural assets must be confirmed before production.
+Fonts are self-hosted Cormorant Garamond and DM Sans. Home uses an optimized, muted interior video with pause/play controls and an accurate poster; narrow screens show it in normal page flow, and reduced-motion visitors do not receive the autoplaying clip. The original 4K video is retained. Home's introduction image shows hands holding a model house, with descriptive alt text. About uses responsive WebP derivatives of Katrina's supplied portrait. Architectural images retain illustrative descriptions and do not imply active listings. See [docs/seo.md](docs/seo.md) for asset sizes and the regeneration command. Confirm retained architectural asset licensing before production.
 
 Architectural images are editorial illustrations of atmosphere, not verified listings. No testimonial, award, sales count, or brokerage affiliation has been fabricated.
 

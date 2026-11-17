@@ -20,7 +20,9 @@ function doPost(e) {
     if (!raw || raw.length > INQUIRY_CONFIG.maxBodyLength) {
       return jsonResponse_({ ok: false, code: 'INVALID_REQUEST' });
     }
-    var payload = JSON.parse(raw);
+    var payload;
+    try { payload = JSON.parse(raw); }
+    catch (parseError) { return jsonResponse_({ ok: false, code: 'INVALID_REQUEST' }); }
     if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       return jsonResponse_({ ok: false, code: 'INVALID_REQUEST' });
     }
@@ -32,9 +34,9 @@ function doPost(e) {
     }
     // Authenticated connection check. Never sends mail or consumes the mail quota.
     if (payload.action === 'check') {
-      return jsonResponse_({ ok: true, recipient: INQUIRY_CONFIG.recipient });
+      return jsonResponse_({ ok: true, recipient: INQUIRY_CONFIG.recipient, consentVersion: 'inquiry-consent-v1' });
     }
-    if (payload.website) return jsonResponse_({ ok: false, code: 'INVALID_REQUEST' });
+    if (payload.website !== undefined && (typeof payload.website !== 'string' || payload.website !== '')) return jsonResponse_({ ok: false, code: 'INVALID_REQUEST' });
     var inquiry = validateInquiry_(payload);
     if (!inquiry) return jsonResponse_({ ok: false, code: 'VALIDATION_ERROR' });
 
@@ -57,7 +59,15 @@ function doPost(e) {
       return jsonResponse_({ ok: false, code: 'LIMIT_REACHED' });
     }
 
-    var timestamp = Utilities.formatDate(new Date(now), 'America/Toronto', 'MMMM d, yyyy, h:mm a z');
+    // Create the submission timestamp on the server, never from a browser-provided date.
+    // Reuse the original receipt timestamp on partial-delivery retries.
+    var consent = receipt && receipt.consent ? receipt.consent : {
+      inquiryConsent: inquiry.inquiryConsent,
+      marketingConsent: inquiry.marketingConsent,
+      submittedAt: new Date(now).toISOString()
+    };
+    inquiry.submittedAt = consent.submittedAt;
+    var timestamp = Utilities.formatDate(new Date(consent.submittedAt), 'America/Toronto', 'MMMM d, yyyy, h:mm a z');
     var subject = 'New real estate inquiry | ' + inquiry.fullName;
     var logo = inquiryLogo_();
     if (!ownerSent) MailApp.sendEmail({
@@ -70,9 +80,9 @@ function doPost(e) {
       inlineImages: { katrinaLogo: logo }
     });
     if (!receipt) {
-      receipt = { hash: fingerprint, at: now, ownerSent: true, visitorSent: false };
+      receipt = { hash: fingerprint, at: now, ownerSent: true, visitorSent: false, consent: consent };
       ledger.push(receipt);
-    } else receipt.ownerSent = true;
+    } else { receipt.ownerSent = true; receipt.consent = consent; }
     // Save partial acceptance so a failed visitor email can retry without repeating the owner email.
     properties.setProperty('INQUIRY_SENDS', JSON.stringify(ledger));
     MailApp.sendEmail({
@@ -97,22 +107,36 @@ function doPost(e) {
 }
 
 function validateInquiry_(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+  // Match the relay's independent validation; this deployment can receive direct requests.
   var limits = { fullName: 120, email: 254, phone: 40, status: 80, area: 200, timeline: 80, message: 5000 };
   var values = {};
   for (var key in limits) {
     if (payload[key] !== undefined && typeof payload[key] !== 'string') return null;
-    values[key] = (payload[key] || '').trim();
-    if (values[key].length > limits[key]) return null;
-    if (key !== 'message' && /[\r\n\x00-\x1f\x7f]/.test(values[key])) return null;
-    if (key === 'message' && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(values[key])) return null;
+    var raw = payload[key] === undefined ? '' : payload[key];
+    if (raw.length > limits[key]) return null;
+    var controls = key === 'message' ? /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]/ : /[\x00-\x1f\x7f-\x9f\u2028\u2029]/;
+    if (controls.test(raw) || /[\uD800-\uDFFF]/u.test(raw)) return null;
+    values[key] = raw.replace(/\r\n?/g, '\n').trim();
   }
   if (!values.fullName || !/^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(values.email)) return null;
+  // Required Canadian/US phone, matching the frontend and trusted relay.
+  if (!/^(?:\+?1[ .-]?)?(?:\([2-9]\d{2}\)|[2-9]\d{2})[ .-]?[2-9]\d{2}[ .-]?\d{4}$/.test(values.phone)) return null;
   if (values.status && INQUIRY_CONFIG.statuses.indexOf(values.status) === -1) return null;
   if (values.timeline && INQUIRY_CONFIG.timelines.indexOf(values.timeline) === -1) return null;
+  if (payload.inquiryConsent !== true) return null;
+  if (payload.marketingConsent !== undefined && typeof payload.marketingConsent !== 'boolean') return null;
+  if (typeof payload.privacyPolicyUrl !== 'string' || payload.privacyPolicyUrl.length > 2048 || !/^https:\/\/[^\s<>"']+$/.test(payload.privacyPolicyUrl)) return null;
+  if (payload.consentVersion !== 'inquiry-consent-v1') return null;
+  values.inquiryConsent = true;
+  values.marketingConsent = payload.marketingConsent === true;
+  values.privacyPolicyUrl = payload.privacyPolicyUrl;
+  values.consentVersion = 'inquiry-consent-v1';
   return values;
 }
 
 function escapeHtml_(value) {
+  // Encode only at the HTML output boundary; keep legitimate apostrophes and text intact.
   return String(value).replace(/[&<>"']/g, function (character) {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
   });
@@ -125,6 +149,10 @@ function renderPlainText_(inquiry, timestamp) {
     '\nBuying/selling status: ' + (inquiry.status || 'Not provided') +
     '\nPreferred area: ' + (inquiry.area || 'Not provided') +
     '\nTimeline: ' + (inquiry.timeline || 'Not provided') +
+    '\n\nCONSENT RECORD\nInquiry processing consent: ' + (inquiry.inquiryConsent ? 'Granted' : 'Not granted') +
+    '\nMarketing consent (optional): ' + (inquiry.marketingConsent ? 'Opted in' : 'Not opted in') +
+    '\nSubmitted at (UTC): ' + (inquiry.submittedAt || '') +
+    '\nPrivacy Policy: ' + inquiry.privacyPolicyUrl + '\nConsent wording version: ' + inquiry.consentVersion +
     '\n\nMessage\n' + (inquiry.message || 'No message provided.') +
     '\n\nReply to this email to contact the visitor.\nToronto, GTA, Canada';
 }
@@ -141,7 +169,12 @@ function renderInquiryEmail_(inquiry, timestamp, logoUrl) {
     ['Phone', inquiry.phone],
     ['Buying/selling status', inquiry.status],
     ['Preferred area', inquiry.area],
-    ['Timeline', inquiry.timeline]
+    ['Timeline', inquiry.timeline],
+    ['Inquiry processing consent', inquiry.inquiryConsent ? 'Granted' : 'Not granted'],
+    ['Marketing consent (optional)', inquiry.marketingConsent ? 'Opted in' : 'Not opted in'],
+    ['Submitted at (UTC)', inquiry.submittedAt || ''],
+    ['Privacy Policy', inquiry.privacyPolicyUrl],
+    ['Consent wording version', inquiry.consentVersion]
   ].map(function (row) {
     return '<tr><td style="padding:16px 0;border-bottom:1px solid #e3e7df;">' +
       '<p style="margin:0 0 6px;color:#59625b;font-size:14px;line-height:1.5;">' + row[0] + '</p>' +

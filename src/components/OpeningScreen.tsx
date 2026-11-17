@@ -33,7 +33,7 @@ export default function OpeningScreen() {
     if (event.target === event.currentTarget && event.animationName === 'opening-curtain') setVisible(false);
   }}>
     <div className="opening-screen-brand">
-      <img src="/images/logo-transparent.png" alt="" width={2142} height={734} fetchPriority="high" onError={() => setVisible(false)} />
+      <img src="/images/logo-transparent.png" alt="Katrina Jota Real Estate logo" width={2142} height={734} fetchPriority="high" onError={() => setVisible(false)} />
       <span className="opening-screen-rule" />
     </div>
   </div>;

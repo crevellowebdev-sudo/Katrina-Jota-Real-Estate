@@ -8,7 +8,7 @@ import { PrimaryButton } from './ui';
 
 export function BrandWordmark({ footer = false }: { footer?: boolean }) {
   return <Link to="/" className={`brand-wordmark ${footer ? 'brand-wordmark--footer' : ''}`} aria-label="Katrina Jota Real Estate home">
-    <img className="brand-logo" src="/images/logo-transparent.png" alt="" width={2142} height={734} decoding="async" />
+    <img className="brand-logo" src="/images/logo-transparent.png" alt="Katrina Jota Real Estate logo" width={2142} height={734} decoding="async" />
   </Link>;
 }
 

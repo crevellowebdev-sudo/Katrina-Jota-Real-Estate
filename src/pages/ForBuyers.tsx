@@ -7,6 +7,8 @@ export default function ForBuyers() {
     <PageHero
       title="For Buyers"
       image="/images/buyers-hero.jpg"
+      imageWidth={1600}
+      imageHeight={770}
       alt="An illustrative contemporary home with stone cladding, large windows, and a broad driveway at dusk"
       reveal
     />
@@ -35,7 +37,7 @@ export default function ForBuyers() {
         </TextReveal>
         <div className="buyer-closing-image">
           <ImageReveal delay={0.1}>
-            <img src="/images/buying.webp" srcSet="/images/buying-640.webp 640w, /images/buying-960.webp 960w, /images/buying.webp 1200w" sizes="(max-width: 700px) calc(100vw - 52px), 78vw" alt="" width={1200} height={800} loading="lazy" decoding="async" />
+            <img src="/images/buying.webp" srcSet="/images/buying-640.webp 640w, /images/buying-960.webp 960w, /images/buying.webp 1200w" sizes="(max-width: 700px) calc(100vw - 52px), 78vw" alt="Illustrative living room with a neutral sofa, warm wood cabinetry and floor-to-ceiling curtains" width={1200} height={800} loading="lazy" decoding="async" />
           </ImageReveal>
         </div>
       </div>

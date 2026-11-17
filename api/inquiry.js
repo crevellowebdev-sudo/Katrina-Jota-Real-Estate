@@ -8,11 +8,13 @@ export default {
     const env = {
       APPS_SCRIPT_URL: process.env.APPS_SCRIPT_URL || deployedScriptUrl,
       INQUIRY_SECRET: process.env.INQUIRY_SECRET || '',
+      PRIVACY_POLICY_URL: process.env.VITE_PRIVACY_POLICY_URL || '',
       SITE_ORIGIN: new URL(request.url).origin,
     };
     if (request.method === 'GET') {
       // Configuration readiness only; does not send a test email or expose credentials.
       const available = env.INQUIRY_SECRET.length >= 32 &&
+        /^https:\/\/[^\s<>"']+$/.test(env.PRIVACY_POLICY_URL) &&
         /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(env.APPS_SCRIPT_URL);
       return Response.json({ available }, { headers: { 'Cache-Control': 'no-store' } });
     }

@@ -1,10 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "vite",
+  "trailingSlash": false,
+  "headers": [
+    { "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }
+  ],
   "functions": {
     "api/inquiry.js": { "maxDuration": 60 }
   },
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/:page(about|for-sellers|for-buyers|contact|thank-you|privacy-policy|terms-and-conditions)/index.html", "destination": "/:page", "permanent": true }
+  ],
   "rewrites": [
-    { "source": "/:page(about|for-sellers|for-buyers|contact|thank-you)", "destination": "/index.html" }
+    { "source": "/:page(about|for-sellers|for-buyers|contact|thank-you|privacy-policy|terms-and-conditions)", "destination": "/:page/index.html" }
   ]
 }

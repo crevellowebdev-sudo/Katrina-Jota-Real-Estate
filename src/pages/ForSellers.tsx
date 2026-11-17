@@ -27,9 +27,9 @@ export default function ForSellers() {
     </section>
     <section className="seller-closing" aria-labelledby="seller-closing-heading">
       <div className="container seller-closing-frame">
-        <div className="seller-closing-image" aria-hidden="true">
+        <div className="seller-closing-image">
           <ImageReveal className="seller-closing-image-reveal">
-            <img src="/images/c.jpg" alt="" width={1600} height={2134} loading="lazy" decoding="async" />
+            <img src="/images/c.jpg" alt="Illustrative aerial view of a residential neighbourhood with detached houses, backyards and tree-lined streets" width={1600} height={2134} loading="lazy" decoding="async" />
           </ImageReveal>
         </div>
         <ScrollReveal className="seller-closing-copy">

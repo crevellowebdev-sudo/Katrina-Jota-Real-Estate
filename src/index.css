@@ -202,6 +202,7 @@ main:focus { outline: none; }
 .contact-details a svg { flex-shrink: 0; }
 .contact-form { min-width: 0; padding: 42px; background: white; border-top: 2px solid var(--color-gold); }
 .required-note { margin-top: 18px; color: var(--muted); }
+.required-marker, .form-field label > .required-marker { color: #B42318; font-weight: 600; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px 24px; margin-top: 32px; }
 .form-field { display: flex; flex-direction: column; min-width: 0; }
 .form-field--full { grid-column: 1 / -1; }
@@ -220,7 +221,32 @@ main:focus { outline: none; }
 .form-actions .primary-button:disabled { opacity: .5; }
 .review-button { min-height: 44px; padding: 8px 0; border: 0; background: transparent; color: var(--color-green); font-size: 16px; font-weight: 600; text-decoration: underline; text-underline-offset: 6px; }
 .form-status { color: var(--color-green); margin-top: 20px; }
+.form-consent { min-width: 0; margin: 32px 0 0; padding: 24px 0 0; border: 0; border-top: 1px solid var(--border); }
+.form-consent legend { padding: 0 0 12px; font-size: 16px; font-weight: 600; }
+.consent-option + .consent-option { margin-top: 24px; }
+.consent-option label { display: flex; align-items: flex-start; gap: 12px; font-size: 16px; line-height: 1.65; cursor: pointer; }
+.consent-option input { width: 20px; height: 20px; flex: 0 0 20px; margin-top: 3px; accent-color: var(--color-primary); cursor: pointer; }
+.consent-option input:disabled { cursor: not-allowed; }
+.consent-option label span { min-width: 0; }
+.consent-option > p { margin: 10px 0 0 32px; color: var(--muted); font-size: 16px; }
 .form-privacy { margin-top: 24px; color: var(--muted); }
+.form-legal { margin-top: 28px; color: var(--muted); font-size: 16px; }
+.form-legal a { color: var(--color-primary); }
+.footer-legal { display: flex; flex-wrap: wrap; gap: 12px 28px; padding-top: 24px; border-top: 1px solid var(--border); font-size: 16px; }
+.footer-legal a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-primary); }
+.legal-page { max-width: 960px; padding-block: clamp(48px, 7vw, 96px); }
+.legal-page-header { padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+.legal-kicker { margin-bottom: 20px; color: var(--muted); }
+.legal-draft-notice { margin-top: 28px; padding: 20px 24px; border-left: 2px solid var(--color-gold); background: white; }
+.legal-introduction { margin-top: 28px; max-width: 65ch; }
+.legal-section { padding-top: 40px; }
+.legal-section h2 { margin-bottom: 20px; }
+.legal-section p { max-width: 68ch; color: var(--muted); }
+.legal-section p + p { margin-top: 18px; }
+.legal-contact { margin-top: 44px; padding-top: 32px; border-top: 1px solid var(--border); }
+.legal-contact p { margin-top: 20px; overflow-wrap: anywhere; }
+.legal-page-navigation { display: flex; flex-wrap: wrap; gap: 12px 32px; margin-top: 28px; }
+.legal-page-navigation a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-primary); }
 
 /* A light footer keeps the full logo in its intended setting. */
 .site-footer { background: var(--color-ivory); border-top: 1px solid var(--border); padding-block: 64px 28px; }
@@ -667,4 +693,77 @@ main:focus { outline: none; }
     scale: 1.035;
   }
   .brand-wordmark:hover .brand-logo { scale: 1.015; }
+}
+
+/* Responsive content must fit its column without hiding text or controls. */
+.primary-button { max-width: 100%; }
+.primary-button > span, .contact-details a > span { min-width: 0; overflow-wrap: anywhere; }
+.contact-details a { max-width: 100%; }
+.contact-details a > span { flex: 1; }
+.home-hero-inner, .home-hero-copy, .introduction-copy, .about-title,
+.biography-copy, .expertise-item, .process-copy, .buying-timeline-copy,
+.contact-introduction, .seller-closing-copy, .buyer-closing-header > * { min-width: 0; }
+main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
+.home-inline-video { margin: 0 var(--gutter) 28px; }
+.home-inline-video .home-expansion-video { position: relative; inset: auto; }
+.home-inline-video video { position: static; display: block; width: 100%; height: auto; transform: none; }
+
+/* Small screens and landscape phones use a flowing hero, with no image overlay. */
+@media (max-width: 900px), (max-height: 600px) {
+  .home-hero { grid-template-columns: 1fr; min-height: 0; }
+  .home-hero-inner { padding: 48px var(--gutter) 36px; }
+  .home-hero-copy { max-width: 620px; }
+  .home-hero-media { margin: 0 var(--gutter) 28px; aspect-ratio: auto; }
+  .home-hero-media img { position: relative; inset: auto; height: auto; object-fit: contain; }
+  .page-hero { display: flex; flex-direction: column; min-height: 0; isolation: auto; overflow: visible; }
+  .page-hero--selling { margin: 16px var(--gutter) 0; }
+  .page-hero-media, .page-hero--buying .page-hero-media { position: relative; inset: auto; z-index: auto; }
+  .page-hero-media .page-hero-image { position: static; width: 100%; height: auto; object-fit: contain; }
+  .page-hero-shade { display: none; }
+  .page-hero--selling .page-hero-content, .page-hero--buying .page-hero-content { padding-block: 24px 0; }
+  .page-hero--selling .page-hero-content { width: 100%; }
+  .page-hero--selling h1, .page-hero--buying h1 { display: block; min-width: 0; padding: 0; background: transparent; }
+  .page-hero h1::before, .page-hero h1::after { display: none; }
+}
+
+@media (max-width: 900px) {
+  .selling-process, .buying-process { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .selling-process-description { padding-top: 0; }
+  .selling-journey, .buying-journey { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .selling-process-aside, .buying-process-aside { position: static; }
+  .selling-image-frame img, .buying-process-aside .editorial-image,
+  .expertise-editorial-photo img, .buyer-closing-image img { aspect-ratio: auto; height: auto; }
+  .buying-process-aside .editorial-image img { height: auto; }
+  .seller-closing-frame { grid-template-columns: minmax(0, 1fr); }
+  .seller-closing-image { aspect-ratio: auto; }
+  .seller-closing-image .seller-closing-image-reveal,
+  .seller-closing-image .image-reveal-clip,
+  .seller-closing-image .image-reveal-media,
+  .seller-closing-image img { position: relative; inset: auto; height: auto; }
+  .buyer-closing-header { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .buyer-closing-header .primary-button { justify-self: start; }
+  .buyer-closing-image { width: 100%; }
+}
+
+@media (max-width: 540px) {
+  .header-inner { gap: 12px; }
+  .brand-wordmark { width: min(210px, calc(100vw - var(--gutter) * 2 - 56px)); }
+  .mobile-menu-top { gap: 12px; }
+  .mobile-menu-top > div { min-width: 0; }
+  .menu-toggle { flex-shrink: 0; }
+  .primary-button { gap: 16px; padding-inline: 18px; }
+  .hero-actions .primary-button, .buyer-closing-header .primary-button { width: 100%; min-width: 0; }
+  .seller-closing-copy { padding-inline: 24px; }
+  .contact-form-heading { gap: 12px; flex-wrap: wrap; }
+  .contact-page--editorial .contact-details a { gap: 8px; }
+  .contact-page--editorial .form-field select { padding-right: 24px; }
+  .buying-timeline-step { padding-left: 58px; }
+  .buying-timeline-branch { width: 6px; }
+}
+
+@media (max-width: 360px) {
+  :root { --gutter: 20px; }
+  .contact-page--editorial .contact-form { padding-inline: 18px; }
+  .contact-page--editorial .contact-details-section { padding-inline: 18px; }
+  .mobile-menu-body .primary-button { gap: 12px; padding-inline: 16px; }
 }

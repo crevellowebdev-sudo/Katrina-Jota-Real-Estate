@@ -4,9 +4,50 @@
 
 This integration was requested after the website's original frontend-only scope. The owner supplied a deployed Apps Script URL and selected Vercel. The website is wired to `/api/inquiry`, which forwards to that deployment. Send Inquiry is clickable without a readiness check and disables only during submission. Missing configuration or a service failure produces an error after clicking; it never produces a false success.
 
+Full name, email, and phone are required. Phone validation accepts Canadian/US 10-digit numbers, an optional `1`/`+1` prefix, and common spaces, hyphens, dots, or parentheses around the area code (for example, `(416) 887-5670` or `+1 416 887 5670`). Empty, malformed, or incomplete numbers are rejected by the browser, the API relay (HTTP 400 before contacting Google), and Apps Script before sending mail. Replace and redeploy `Code.gs` using **Deploy > Manage deployments > Edit > New version > Deploy** to activate the updated validation in Google's deployed copy. Redeploy the website to activate the frontend and API changes in production.
+
+## Input validation and output escaping
+
+### Consent and Privacy Policy setup
+
+Set **`VITE_PRIVACY_POLICY_URL`** to the client's approved, published HTTPS policy URL in `.env.local` and Vercel's environment settings, then restart/rebuild. This public value is read by both the form and Vercel API; a standalone Worker uses `PRIVACY_POLICY_URL` instead. No policy URL or policy text is invented. Without a valid policy URL, the form shows a clearly labeled pending-policy notice and blocks sending; the API also rejects attempts to bypass this state.
+
+The required inquiry-processing checkbox and optional marketing checkbox both start unchecked. Only explicit inquiry consent (`true`) allows submission. Marketing consent is independent: opting out never blocks an inquiry. Both APIs reject string/number substitutes for booleans; omitted marketing consent defaults to `false`. Consent choices persist only in the in-memory draft while browsing and reset to unchecked after an accepted inquiry. Recording marketing consent does not subscribe the visitor to a mailing list or send marketing messages.
+
+The trusted relay supplies the configured policy URL and `inquiry-consent-v1` wording identifier. Apps Script creates the UTC ISO submission timestamp itself; browser-supplied timestamps and policy URLs are ignored by the relay. The owner notification's plain-text and HTML bodies include both consent statuses, the UTC timestamp, policy URL, and wording identifier, providing the persistent record through the existing email delivery system. No database or new long-term audit service is added.
+
+The existing rolling 24-hour deduplication ledger also stores the two boolean consent choices and the original UTC timestamp next to the inquiry hash and delivery flags. It contains no names, email addresses, message text, or full policy URLs. Minimal records keep the bounded 30-entry ledger within Apps Script's per-property limit. Partial-delivery retries reuse the original timestamp; changed consent choices produce distinct hashes and are not suppressed as identical inquiries. Keep the owner's notification emails if a retained consent history is needed beyond the ledger's 24-hour window.
+
+Current wording for `inquiry-consent-v1`:
+
+- Required: "I consent to Katrina Jota Real Estate using my information to respond to this inquiry."
+- Optional: "I would also like to receive real estate news and marketing emails from Katrina Jota Real Estate."
+
+Bump the wording identifier in both server layers when materially changing those statements. Replace and redeploy `Code.gs` before deploying the website update. The relay checks the script's consent capability before sending; older scripts are rejected rather than silently omitting consent records. Human verification is currently removed; CAPTCHA configuration is not required.
+
+Both the API relay and Apps Script independently enforce these limits before any email is sent. Browser limits provide feedback and are not trusted as a security boundary.
+
+| Field | Maximum length | Validation |
+| --- | ---: | --- |
+| Full name | 120 | Required, single-line text |
+| Email | 254 | Required, email format, no header separators or whitespace |
+| Phone | 40 | Required, Canadian/US number format above |
+| Buying/selling status | 80 | Empty or one of the three approved options |
+| Preferred area | 200 | Optional, single-line text |
+| Timeline | 80 | Empty or one of the four approved options |
+| Message | 5,000 | Optional multiline plain text |
+
+Lengths use JavaScript UTF-16 units, matching HTML `maxlength`, and are checked before trimming. Non-string text field values, unsupported control characters, and malformed Unicode are rejected. Leading/trailing whitespace is trimmed and message line endings are normalized to LF. Valid names, apostrophes, Unicode, and literal punctuation are preserved. Only the seven approved text fields, validated consent booleans, server-configured policy metadata, and the server's own secret reach Apps Script; visitor-provided recipients, credentials, actions, timestamps, and extra fields are ignored. A populated or non-string honeypot is rejected.
+
+The relay caps request bodies at 14,000 bytes while streaming, accepts JSON only, and returns HTTP 400 for invalid UTF-8, malformed JSON, invalid root types, or invalid fields. Size violations return HTTP 413. Error responses contain fixed validation messages and never echo submitted values. Apps Script independently limits request length and rejects invalid input before locking, recording a receipt, or sending mail.
+
+Email templates HTML-escape `&`, `<`, `>`, double quotes, and apostrophes at the output boundary. Dynamic URL values are URL-encoded and then HTML-escaped in attributes. Plain-text emails preserve literal text; HTML is never executed from form values. React renders form errors as text, without raw HTML insertion. No SQL/database is used, so there are no SQL queries to parameterize. Any future SQL integration must bind submitted values using parameterized queries or prepared statements.
+
+Regression checks: `node scripts/test-inquiry.mjs`, `node scripts/test-google-apps-script.mjs`, and `node scripts/test-local-inquiry.mjs`. The tests cover boundary lengths, malformed requests, bypassed frontend validation, header/control injection, Unicode, normalization, and HTML/URL escaping. Email services are mocked; these tests send no real email. Guidance: [OWASP Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html) and [SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html).
+
 ## Vercel setup for this website
 
-The repository now includes `api/inquiry.js` and `vercel.json`. The script URL supplied by the owner is already the function's default. No Cloudflare Worker deployment is needed for Vercel.
+Human verification is currently removed at the owner's request. No CAPTCHA keys or tokens are required. Consent, Privacy Policy configuration, server validation, the origin check, honeypot, deduplication, and existing sending limits remain active.
 
 1. In **Vercel > Project > Settings > Environment Variables**, add **`INQUIRY_SECRET`** with the exact same value configured under **Apps Script > Project Settings > Script properties**. Use at least 32 random characters. Keep this value out of chat, source control, and any `VITE_` variables.
 2. Enable the variable for the intended Vercel environments and redeploy. Set `APPS_SCRIPT_URL` only if you want to override the URL already in `api/inquiry.js`.
@@ -61,7 +102,7 @@ Google Apps Script is hosted on a different origin and uses response redirects. 
 | `APPS_SCRIPT_URL` | Google's deployed `/exec` URL |
 | `INQUIRY_SECRET` | Store as a Worker secret; use the same value as Script properties |
 
-For a different host, implement the same relay using that host's server functions. The origin check rejects ordinary cross-site browser submissions; it is not bot authentication. The script also validates field lengths and allowed choices, rejects a populated optional `website` honeypot, deduplicates identical inquiries for 24 hours, and caps accepted messages at 30 in a rolling 24-hour period. Add host-level rate limiting or CAPTCHA for the public endpoint before launch if needed; this example does not include a CAPTCHA integration. Script properties retain only bounded hashes and timestamps for the deduplication window, not inquiry text.
+For a different host, implement the same relay using that host's server functions. The origin check rejects ordinary cross-site browser submissions; it is not bot authentication. The script also validates field lengths, consent booleans and allowed choices, rejects a populated optional `website` honeypot, deduplicates identical inquiries for 24 hours, and caps accepted messages at 30 in a rolling 24-hour period. Script properties retain bounded hashes, timestamps, consent booleans and delivery flags for the deduplication window, not inquiry text.
 
 ## 3. Website adapter reference (already implemented for Vercel)
 
@@ -85,7 +126,7 @@ const sendInquiry: InquiryAdapter = async (values) => {
 // <ContactForm adapter={sendInquiry} />
 ```
 
-Adapt the import path to the file that contains the adapter. Before enabling the form, confirm required fields and the submit label, replace the draft-only privacy statement with accurate transmission wording, and describe acceptance without guaranteeing inbox delivery. Current defaults require full name and email; the remaining fields are optional.
+Adapt the import path to the file that contains the adapter. Describe acceptance without guaranteeing inbox delivery. Current defaults require full name, email, phone and inquiry-processing consent. Marketing consent and the other inquiry fields are optional. Configure the approved Privacy Policy URL before enabling submission.
 
 ## Verification
 

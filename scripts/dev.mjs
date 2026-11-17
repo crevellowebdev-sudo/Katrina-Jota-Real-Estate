@@ -1,6 +1,7 @@
 import { build, createServer, loadEnv, preview } from 'vite';
 import { parseArgs } from 'node:util';
 import { localInquiryMiddleware } from './local-inquiry.mjs';
+import { prerenderSite } from './prerender.mjs';
 
 const { values } = parseArgs({ options: {
   port: { type: 'string', default: '5173' },
@@ -13,7 +14,7 @@ if (!['127.0.0.1', 'localhost', '::1'].includes(values.host)) {
 }
 
 const localEnv = loadEnv('development', process.cwd(), '');
-for (const key of ['INQUIRY_SECRET', 'APPS_SCRIPT_URL']) {
+for (const key of ['INQUIRY_SECRET', 'APPS_SCRIPT_URL', 'VITE_PRIVACY_POLICY_URL']) {
   if (process.env[key] === undefined && localEnv[key]) process.env[key] = localEnv[key];
 }
 
@@ -27,11 +28,14 @@ const config = {
     configurePreviewServer(vite) { vite.middlewares.use(localInquiryMiddleware()); },
   }],
 };
-if (values.preview) await build({ configLoader: values.configLoader });
+if (values.preview) {
+  await build({ configLoader: values.configLoader });
+  await prerenderSite();
+}
 const server = values.preview ? await preview(config) : await createServer(config);
 if (!values.preview) await server.listen();
 server.printUrls();
 server.bindCLIShortcuts({ print: true });
-console.log(process.env.INQUIRY_SECRET?.length >= 32
+console.log(process.env.INQUIRY_SECRET?.length >= 32 && process.env.VITE_PRIVACY_POLICY_URL
   ? 'Local email API ready. Submitting the form will contact the deployed Google Apps Script.'
-  : 'Email sending disabled: set INQUIRY_SECRET in .env.local to match Apps Script, then restart this command.');
+  : 'Email sending requires INQUIRY_SECRET and VITE_PRIVACY_POLICY_URL. Configure .env.local, then restart this command.');

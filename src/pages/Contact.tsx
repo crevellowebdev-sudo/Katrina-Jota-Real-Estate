@@ -18,7 +18,7 @@ export default function Contact() {
     <header className="contact-page-heading"><h1 id="contact-heading">Contact</h1><span className="contact-heading-rule" aria-hidden="true" /></header>
     <div className="contact-workspace">
     <div className="contact-introduction">
-      <h2 className="contact-subheading">Connect With Us</h2>
+      <h2 className="contact-subheading">Connect with Me</h2>
       <p>Whether you are looking to buy, sell, or simply explore the GTA market, I am here to guide you every step of the way. Let's start a conversation.</p>
       <section className="contact-details-section" aria-labelledby="contact-details-heading">
         <h2 id="contact-details-heading">Contact details</h2>
