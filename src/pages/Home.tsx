@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react';
 import { useMotionValueEvent, useScroll, useTransform } from 'motion/react';
-import ScrollExpansionVideo, { useHeroCompactLayout, useHeroReducedMotion } from '../components/scroll-expansion-hero';
+import ScrollExpansionVideo, { useHeroReducedMotion } from '../components/scroll-expansion-hero';
 import * as motion from 'motion/react-m';
 import { editorialEase, ImageReveal, PrimaryButton, TextReveal } from '../components/ui';
 
 function HomeHero() {
   const reduceMotion = useHeroReducedMotion();
-  const compact = useHeroCompactLayout();
-  const staticHero = reduceMotion || compact;
+  const staticHero = reduceMotion;
   const heroRef = useRef<HTMLElement>(null);
   const [copyHidden, setCopyHidden] = useState(false);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end end'] });

@@ -656,22 +656,19 @@ main:focus { outline: none; }
 /* The original hero image stays in place; video expands only inside it. */
 .home-expansion-video { position: absolute; inset: 0; overflow: hidden; }
 .home-expansion-video > video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; transform: scale(1.2); transform-origin: center; }
-.home-video-control { position: absolute; z-index: 2; right: 16px; bottom: 16px; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 16px; background: var(--color-primary); color: white; border: 1px solid white; font-size: 16px; }
-.home-video-control:hover { background: var(--color-primary-hover); }
-.home-video-control:focus-visible { outline-color: white; }
 
-/* Centered video grows over the preserved split hero with normal scrolling. */
+/* Centered video grows over the preserved hero with normal scrolling. */
 .home-scroll-scene--active { --home-stage-height: max(660px, calc(100svh - var(--header-height))); position: relative; height: calc(var(--home-stage-height) + 100svh); }
 .home-scroll-scene--active .home-scroll-stage { position: sticky; top: var(--header-height); height: var(--home-stage-height); }
 .home-scroll-scene--active .home-hero { height: 100%; min-height: 0; }
 .home-centered-video { position: absolute; inset: 0; pointer-events: none; }
 .home-centered-video .home-expansion-video { pointer-events: none; }
-.home-centered-video .home-video-control { pointer-events: auto; padding: 8px 12px; }
-@media (max-width: 700px) {
-  .home-scroll-scene--active { --home-stage-height: max(940px, calc(100svh - var(--header-height))); }
-  .home-scroll-scene--active .home-hero { grid-template-rows: auto minmax(300px, 1fr); }
-  .home-scroll-scene--active .home-hero-media { aspect-ratio: auto; }
-  .home-centered-video .home-video-control { gap: 8px; }
+@media (max-width: 900px), (max-height: 600px) {
+  .home-scroll-scene--active { --home-stage-height: max(760px, calc(100svh - var(--header-height))); }
+  .home-scroll-scene--active .home-hero { grid-template-rows: auto minmax(0, 1fr); }
+  .home-scroll-scene--active .home-hero-media { aspect-ratio: auto; min-height: 240px; }
+  .home-scroll-scene--active .home-hero-media img { position: absolute; inset: 0; height: 100%; object-fit: cover; object-position: 60% center; }
+  .home-centered-video--compact .home-expansion-video > video { object-fit: cover; transform: none; }
 }
 
 /* The Sellers and Buyers hero photographs drift down as the page scrolls. */
@@ -704,10 +701,6 @@ main:focus { outline: none; }
 .biography-copy, .expertise-item, .process-copy, .buying-timeline-copy,
 .contact-introduction, .seller-closing-copy, .buyer-closing-header > * { min-width: 0; }
 main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
-.home-inline-video { margin: 0 var(--gutter) 28px; }
-.home-inline-video .home-expansion-video { position: relative; inset: auto; }
-.home-inline-video video { position: static; display: block; width: 100%; height: auto; transform: none; }
-
 /* Small screens and landscape phones use a flowing hero, with no image overlay. */
 @media (max-width: 900px), (max-height: 600px) {
   .home-hero { grid-template-columns: 1fr; min-height: 0; }

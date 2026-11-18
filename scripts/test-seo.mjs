@@ -87,13 +87,9 @@ try {
   assert.ok(await video.getAttribute('aria-label'));
   assert.equal(await video.getAttribute('aria-hidden'),null);
   assert.ok(await page.locator('#home-video-description').textContent());
-  const pause=page.getByRole('button',{name:'Pause home interior video'});
-  await pause.click();assert.equal(await video.evaluate(v=>v.paused),true);
-  await page.getByRole('button',{name:'Play home interior video'}).click();
-  await page.waitForTimeout(500);
-  assert.equal(await page.getByRole('button',{name:'Pause home interior video'}).count(),1);
+  assert.equal(await page.locator('.home-video-control').count(),0);
   assert.deepEqual(runtime,[]);
-  console.log('SEO: raw HTML for seven routes, unique metadata, media alternatives, no-JS safety, crawl directives, sitemap exclusions, seven accessibility audits, navigation, and video controls pass.');
+  console.log('SEO: raw HTML for seven routes, unique metadata, media alternatives, no-JS safety, crawl directives, sitemap exclusions, seven accessibility audits, navigation, and video presentation pass.');
 } finally {await browser.close();server.closeAllConnections();await new Promise(resolve=>server.close(resolve));}
 
 const vite=await viteServer({configLoader:'runner',mode:'production',cacheDir:'node_modules/.vite-seo-tests',appType:'custom',server:{middlewareMode:true},optimizeDeps:{noDiscovery:true,include:[]},logLevel:'error'});
