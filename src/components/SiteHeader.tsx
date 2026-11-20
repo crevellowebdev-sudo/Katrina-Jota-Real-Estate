@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import * as motion from 'motion/react-m';
-import { useReducedMotion } from 'motion/react';
+import { stagger, useAnimate } from 'motion/react';
 import { business, navigation } from '../data/site';
 import { PrimaryButton } from './ui';
+import { useHeroReducedMotion } from './scroll-expansion-hero';
 
 export function BrandWordmark({ footer = false }: { footer?: boolean }) {
   return <Link to="/" className={`brand-wordmark ${footer ? 'brand-wordmark--footer' : ''}`} aria-label="Katrina Jota Real Estate home">
@@ -19,24 +18,59 @@ export function DesktopNavigation() {
 }
 
 export function MobileNavigation({ open, onClose, triggerRef }: { open: boolean; onClose: () => void; triggerRef: RefObject<HTMLButtonElement | null> }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [dialogRef, animate] = useAnimate<HTMLDialogElement>();
   const closeRef = useRef<HTMLButtonElement>(null);
-  const reduceMotion = useReducedMotion();
+  const previousOverflow = useRef<string | null>(null);
+  const openingPlayback = useRef<{ complete: () => void } | null>(null);
+  const reduceMotion = useHeroReducedMotion();
+
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog || !open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    dialog.showModal();
-    closeRef.current?.focus();
-    return () => {
+    if (!dialog || (!open && !dialog.open)) return;
+    let active = true;
+    if (open) {
+      if (previousOverflow.current === null) previousOverflow.current = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      if (!dialog.open) dialog.showModal();
+      closeRef.current?.focus();
+    }
+    const immediate = reduceMotion || (!open && window.matchMedia('(min-width: 1280px)').matches);
+    const playback = open ? animate([
+      [dialog, { opacity: [0, 1], y: [-14, 0] }, { duration: immediate ? 0 : .4, at: 0 }],
+      ['.mobile-menu-body nav a', { opacity: [0, 1], x: 0, y: [14, 0] }, { duration: immediate ? 0 : .38, delay: immediate ? 0 : stagger(.045), at: immediate ? 0 : .06 }],
+      ['.mobile-menu-body > .primary-button, .mobile-contact', { opacity: [0, 1], y: [10, 0] }, { duration: immediate ? 0 : .35, at: immediate ? 0 : .2 }],
+    ], { defaultTransition: { ease: [.22, 1, .36, 1] } }) : animate([
+      ['.mobile-menu-body nav a', { opacity: 0, x: 0, y: -10 }, { duration: immediate ? 0 : .18, delay: immediate ? 0 : stagger(.02, { from: 'last' }), at: 0 }],
+      ['.mobile-menu-body > .primary-button, .mobile-contact', { opacity: 0, y: 8 }, { duration: immediate ? 0 : .18, at: 0 }],
+      [dialog, { opacity: 0, y: -12 }, { duration: immediate ? 0 : .25, at: immediate ? 0 : .08 }],
+    ], { defaultTransition: { ease: [.4, 0, .2, 1] } });
+    openingPlayback.current = open ? playback : null;
+    if (!open) void playback.finished.then(() => {
+      if (!active) return;
       dialog.close();
-      document.body.style.overflow = previousOverflow;
-      triggerRef.current?.focus({ preventScroll: true });
+      document.body.style.overflow = previousOverflow.current ?? '';
+      previousOverflow.current = null;
+      if (triggerRef.current?.getClientRects().length) triggerRef.current.focus({ preventScroll: true });
+    });
+    return () => {
+      active = false;
+      openingPlayback.current = null;
+      playback.stop();
     };
-  }, [open, triggerRef]);
+  }, [animate, dialogRef, open, reduceMotion, triggerRef]);
 
-  return <dialog ref={dialogRef} id="mobile-navigation" className="mobile-navigation" aria-label="Site navigation" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={event => {
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    return () => {
+      dialog?.close();
+      if (previousOverflow.current !== null) {
+        document.body.style.overflow = previousOverflow.current;
+        previousOverflow.current = null;
+      }
+    };
+  }, [dialogRef]);
+
+  return <dialog ref={dialogRef} id="mobile-navigation" className="mobile-navigation" aria-label="Site navigation" onFocusCapture={() => { if (open) openingPlayback.current?.complete(); }} onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={event => {
     if (event.key !== 'Tab') return;
     const items = [...event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]')];
     const first = items[0];
@@ -44,13 +78,17 @@ export function MobileNavigation({ open, onClose, triggerRef }: { open: boolean;
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   }}>
-    <div className="mobile-menu-top"><div onClick={onClose}><BrandWordmark /></div><button ref={closeRef} className="menu-toggle" onClick={onClose} aria-label="Close navigation"><X size={25} strokeWidth={1.3} /></button></div>
-    {open && <motion.div className="mobile-menu-body" initial={reduceMotion ? false : { opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
-      <nav aria-label="Mobile navigation">{navigation.map((item, index) => <NavLink key={item.to} to={item.to} end={item.to === '/'} onClick={onClose}><span className="mobile-nav-number">0{index + 1}</span>{item.label}</NavLink>)}</nav>
+    <div className="mobile-menu-top"><div onClick={onClose}><BrandWordmark /></div><button ref={closeRef} className="menu-toggle" onClick={onClose} aria-label="Close navigation"><MenuGlyph expanded={open} /></button></div>
+    <div className="mobile-menu-body">
+      <nav aria-label="Mobile navigation">{navigation.map(item => <NavLink key={item.to} to={item.to} end={item.to === '/'} onClick={onClose}><span>{item.label}</span></NavLink>)}</nav>
       <PrimaryButton to="/contact" onClick={onClose}>Book a Free Consultation</PrimaryButton>
       <a className="mobile-contact" href={business.phoneHref}>{business.phone}</a>
-    </motion.div>}
+    </div>
   </dialog>;
+}
+
+function MenuGlyph({ expanded }: { expanded: boolean }) {
+  return <span className="menu-glyph" data-expanded={expanded} aria-hidden="true"><i /><i /><i /></span>;
 }
 
 export default function SiteHeader() {
@@ -71,7 +109,7 @@ export default function SiteHeader() {
       <BrandWordmark />
       <DesktopNavigation />
       <PrimaryButton to="/contact" className="header-cta">Book a Free Consultation</PrimaryButton>
-      <button ref={triggerRef} className="menu-toggle mobile-menu-trigger" aria-expanded={open} aria-controls="mobile-navigation" aria-label="Open navigation menu" onClick={() => setOpen(true)}><span>MENU</span><Menu size={25} strokeWidth={1.3} /></button>
+      <button ref={triggerRef} className="menu-toggle mobile-menu-trigger" aria-expanded={open} aria-controls="mobile-navigation" aria-label="Open navigation menu" onClick={() => setOpen(true)}><span>MENU</span><MenuGlyph expanded={open} /></button>
     </div>
     <MobileNavigation open={open} onClose={() => setOpen(false)} triggerRef={triggerRef} />
   </header>;
