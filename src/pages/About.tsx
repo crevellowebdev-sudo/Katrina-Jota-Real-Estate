@@ -1,5 +1,6 @@
 import { ImageReveal, ScrollReveal, SectionHeading } from '../components/ui';
 import { expertise } from '../data/site';
+import FlowArt, { FlowSection } from '../components/story-scroll';
 
 export default function About() {
   return <>
@@ -20,21 +21,25 @@ export default function About() {
       </ScrollReveal>
     </section>
 
-    <section className="expertise-story expertise-editorial" aria-labelledby="expertise-heading">
-      <div className="container">
-        <SectionHeading className="expertise-editorial-heading"><span id="expertise-heading">Expertise &amp; Credentials</span></SectionHeading>
-        <div className="expertise-layout">
-          <figure className="expertise-editorial-photo">
-            <ImageReveal>
-              <img src="/images/h.jpg" alt="An illustrative aerial view of a residential neighbourhood with detached homes and tree-lined surroundings" width={1600} height={1997} loading="lazy" decoding="async" />
-            </ImageReveal>
-          </figure>
-          <div className="expertise-grid">{expertise.map((item, index) => <ScrollReveal key={item.title} className="expertise-item">
+    <section className="expertise-story-unified" aria-labelledby="expertise-heading">
+      <FlowArt aria-label="Expertise and credentials">
+        <FlowSection index={1} tilt={9}>
+          <div className="expertise-section">
+      <div className="container expertise-layout">
+        <SectionHeading><span id="expertise-heading">Expertise & Credentials</span></SectionHeading>
+        <div className="expertise-grid">
+          {expertise.map((item, index) => (
+            <ScrollReveal key={item.title} className="expertise-item" delay={index * 0.06}>
               <span className="expertise-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-              <h3>{item.title}</h3><p>{item.description}</p>
-          </ScrollReveal>)}</div>
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </ScrollReveal>
+          ))}
         </div>
       </div>
+          </div>
+        </FlowSection>
+      </FlowArt>
     </section>
 
   </>;

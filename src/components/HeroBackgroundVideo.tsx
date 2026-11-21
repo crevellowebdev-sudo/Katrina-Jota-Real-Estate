@@ -1,28 +1,39 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-const mobileQuery = '(max-width: 900px)';
+const mobileQuery = '(max-width: 700px), (max-width: 900px) and (orientation: portrait)';
 const reducedQuery = '(prefers-reduced-motion: reduce)';
+
+type HeroMedia = { source: string; poster: string; still: boolean };
+
+const desktopVideo: HeroMedia = { source: '/images/hero-loop.mp4', poster: '/images/hero-loop-poster.jpg', still: false };
+const mobileVideo: HeroMedia = { source: '/images/hero-loop-mobile.mp4', poster: '/images/hero-loop-mobile-poster.jpg', still: false };
+const desktopStill: HeroMedia = { ...desktopVideo, still: true };
+const mobileStill: HeroMedia = { ...mobileVideo, still: true };
+
 function subscribe(callback: () => void) {
   const queries = [mobileQuery, reducedQuery].map(query => window.matchMedia(query));
   queries.forEach(query => query.addEventListener('change', callback));
   return () => queries.forEach(query => query.removeEventListener('change', callback));
 }
-function getVideoSource() {
-  if (window.matchMedia(reducedQuery).matches) return null;
-  return window.matchMedia(mobileQuery).matches ? '/images/herovidmobile.mp4' : '/images/herovid.mp4';
+
+function getMedia(): HeroMedia {
+  const mobile = window.matchMedia(mobileQuery).matches;
+  if (window.matchMedia(reducedQuery).matches) return mobile ? mobileStill : desktopStill;
+  return mobile ? mobileVideo : desktopVideo;
 }
 
 export default function HeroBackgroundVideo() {
-  const source = useSyncExternalStore(subscribe, getVideoSource, () => null);
-  return source ? <HeroVideoSource key={source} source={source} /> : null;
+  const media = useSyncExternalStore(subscribe, getMedia, () => null);
+  return media ? <HeroVideoMedia key={media.source} media={media} /> : null;
 }
 
-function HeroVideoSource({ source }: { source: string }) {
+function HeroVideoMedia({ media }: { media: HeroMedia }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
+    if (media.still) return;
     const video = videoRef.current;
     if (!video || failed) return;
     let active = true;
@@ -47,12 +58,17 @@ function HeroVideoSource({ source }: { source: string }) {
       document.removeEventListener('visibilitychange', updatePlayback);
       video.pause();
     };
-  }, [source, failed]);
+  }, [failed, media.still, media.source]);
 
-  if (failed) return null;
+  if (media.still || failed) {
+    return <div className="home-hero-video-layer is-ready" aria-hidden="true">
+      <img src={media.poster} alt="" width={1920} height={1080} decoding="async" fetchPriority="high" />
+    </div>;
+  }
+
   return <div className={`home-hero-video-layer${ready ? ' is-ready' : ''}`} aria-hidden="true">
-      <video ref={videoRef} src={source} poster="/images/editorial-home.jpg"
-        autoPlay muted loop playsInline preload="metadata" tabIndex={-1}
+      <video ref={videoRef} src={media.source} poster={media.poster}
+        autoPlay muted loop playsInline preload="auto" tabIndex={-1} disablePictureInPicture
         onPlaying={() => setReady(true)} onError={() => setFailed(true)} />
-  </div>;
+    </div>;
 }
