@@ -86,8 +86,12 @@ for (const marketingConsent of [undefined, false, true]) {
   assert.ok(emails[0].body.includes('inquiry-consent-v1'));
   assert.ok(Date.parse(record.submittedAt) >= before && Date.parse(record.submittedAt) <= Date.now());
   assert.ok(emails[0].body.includes(record.submittedAt));
-  assert.ok(emails[0].htmlBody.includes(record.submittedAt));
-  assert.ok(emails[0].body.includes(marketingConsent ? 'Opted in' : 'Not opted in'));
+  assert.ok(!emails[0].htmlBody.includes(record.submittedAt), 'The visible email uses the formatted received date');
+  assert.ok(emails[0].body.includes(marketingConsent ? 'Marketing emails: Requested' : 'Marketing emails: Not requested'));
+  assert.ok(emails[0].htmlBody.includes(marketingConsent ? 'Requested by the visitor.' : 'Not requested.'));
+  assert.ok(emails[0].htmlBody.indexOf('Contact preferences') > emails[0].htmlBody.indexOf('Reply to inquiry'));
+  assert.ok(!emails[0].htmlBody.includes('Consent wording version'));
+  assert.ok(!emails[0].htmlBody.includes('inquiry-consent-v1'));
   assert.equal(post({ marketingConsent, submittedAt: '2099-01-01T00:00:00.000Z' }).duplicate, true);
   assert.equal(JSON.parse(properties.get('INQUIRY_SENDS'))[0].consent.submittedAt, record.submittedAt);
 }

@@ -149,12 +149,13 @@ function renderPlainText_(inquiry, timestamp) {
     '\nBuying/selling status: ' + (inquiry.status || 'Not provided') +
     '\nPreferred area: ' + (inquiry.area || 'Not provided') +
     '\nTimeline: ' + (inquiry.timeline || 'Not provided') +
-    '\n\nCONSENT RECORD\nInquiry processing consent: ' + (inquiry.inquiryConsent ? 'Granted' : 'Not granted') +
-    '\nMarketing consent (optional): ' + (inquiry.marketingConsent ? 'Opted in' : 'Not opted in') +
-    '\nSubmitted at (UTC): ' + (inquiry.submittedAt || '') +
-    '\nPrivacy Policy: ' + inquiry.privacyPolicyUrl + '\nConsent wording version: ' + inquiry.consentVersion +
     '\n\nMessage\n' + (inquiry.message || 'No message provided.') +
-    '\n\nReply to this email to contact the visitor.\nToronto, GTA, Canada';
+    '\n\nReply to this email to contact the visitor.\nToronto, GTA, Canada' +
+    '\n\nCONTACT PREFERENCES\nPermission to respond: ' + (inquiry.inquiryConsent ? 'Confirmed' : 'Not confirmed') +
+    '\nMarketing emails: ' + (inquiry.marketingConsent ? 'Requested' : 'Not requested') +
+    '\nPrivacy Policy: ' + inquiry.privacyPolicyUrl +
+    '\n\nSubmission record (reference only)\nRecorded at (UTC): ' + (inquiry.submittedAt || '') +
+    '\nConsent reference: ' + inquiry.consentVersion;
 }
 
 function renderInquiryEmail_(inquiry, timestamp, logoUrl) {
@@ -169,12 +170,7 @@ function renderInquiryEmail_(inquiry, timestamp, logoUrl) {
     ['Phone', inquiry.phone],
     ['Buying/selling status', inquiry.status],
     ['Preferred area', inquiry.area],
-    ['Timeline', inquiry.timeline],
-    ['Inquiry processing consent', inquiry.inquiryConsent ? 'Granted' : 'Not granted'],
-    ['Marketing consent (optional)', inquiry.marketingConsent ? 'Opted in' : 'Not opted in'],
-    ['Submitted at (UTC)', inquiry.submittedAt || ''],
-    ['Privacy Policy', inquiry.privacyPolicyUrl],
-    ['Consent wording version', inquiry.consentVersion]
+    ['Timeline', inquiry.timeline]
   ].map(function (row) {
     return '<tr><td style="padding:16px 0;border-bottom:1px solid #e3e7df;">' +
       '<p style="margin:0 0 6px;color:#59625b;font-size:14px;line-height:1.5;">' + row[0] + '</p>' +
@@ -209,6 +205,11 @@ function renderInquiryEmail_(inquiry, timestamp, logoUrl) {
     '<p style="margin:6px 0 0;color:#59625b;font-size:14px;line-height:1.7;">Toronto, GTA, Canada<br>' +
     '<a href="tel:+14168875670" style="color:#024D2C;text-decoration:underline;">(416) 887-5670</a></p>' +
     '<p style="margin:20px 0 0;color:#59625b;font-size:12px;line-height:1.7;">This email contains contact information submitted through your website. Please handle it with care.</p>' +
+    '<p style="margin:16px 0 4px;color:#242824;font-size:12px;line-height:1.7;font-weight:600;">Contact preferences</p>' +
+    '<p style="margin:0;color:#59625b;font-size:12px;line-height:1.7;">' +
+    (inquiry.inquiryConsent ? 'The visitor has given permission to respond to this inquiry.' : 'Permission to respond has not been confirmed.') +
+    '<br>Marketing emails: ' + (inquiry.marketingConsent ? 'Requested by the visitor.' : 'Not requested.') +
+    '<br><a href="' + safe(inquiry.privacyPolicyUrl) + '" style="color:#024D2C;text-decoration:underline;">Privacy Policy</a></p>' +
     '</td></tr></table><!--[if mso]></td></tr></table><![endif]--></td></tr></table></body></html>';
 }
 
