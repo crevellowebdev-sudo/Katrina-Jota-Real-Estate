@@ -344,7 +344,9 @@ try {
 const previousSecret = process.env.INQUIRY_SECRET;
 const previousScript = process.env.APPS_SCRIPT_URL;
 const previousPolicy = process.env.VITE_PRIVACY_POLICY_URL;
+const previousSiteUrl = process.env.VITE_SITE_URL;
 try {
+  delete process.env.VITE_SITE_URL;
   delete process.env.INQUIRY_SECRET;
   delete process.env.APPS_SCRIPT_URL;
   const readinessRequest = () => new Request('https://example.com/api/inquiry');
@@ -354,12 +356,23 @@ try {
   process.env.VITE_PRIVACY_POLICY_URL = env.PRIVACY_POLICY_URL;
   assert.equal((await (await vercelHandler.fetch(readinessRequest())).json()).available, true);
   globalThis.fetch = mockGoogle(async (url, options) => {
-    assert.ok(url.includes('AKfycbxBxprg78OX094PvfCaJ6xxHejoR5ci8rNVMagkYTq2yiSX6F8_kY1-DrAK9_rYqMpR'));
+    assert.equal(url, 'https://script.google.com/macros/s/AKfycbyNYW7RZ1_eDUVDzsD5KGKi10SsBeoIq4jB2K0tAaLn8B-QKQA3D4tQCODMvNQqxE0jKQ/exec');
     assert.equal(JSON.parse(options.body).secret, secret);
     return Response.json({ ok: true, recipient: 'rozelramos17@gmail.com', consentVersion: 'inquiry-consent-v1' });
   });
   assert.equal((await vercelHandler.fetch(request())).status, 200);
   assert.equal((await vercelHandler.fetch(request(sample, 'https://other.example'))).status, 403);
+  // A public Vercel alias can differ from the URL seen by the function.
+  process.env.VITE_SITE_URL = 'https://example.com/';
+  const proxiedRequest = origin => new Request('https://internal-deployment.vercel.app/api/inquiry', {
+    method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json' }, body: JSON.stringify(sample),
+  });
+  assert.equal((await vercelHandler.fetch(proxiedRequest('https://example.com'))).status, 200);
+  assert.equal((await vercelHandler.fetch(proxiedRequest('https://other.example'))).status, 403);
+  process.env.VITE_SITE_URL = 'invalid-url';
+  assert.equal((await vercelHandler.fetch(proxiedRequest('https://example.com'))).status, 403);
+  assert.equal((await (await vercelHandler.fetch(readinessRequest())).json()).available, false);
+  delete process.env.VITE_SITE_URL;
   globalThis.fetch = mockGoogle(async () => Response.json({ ok: false, code: 'UNAUTHORIZED' }));
   assert.equal((await vercelHandler.fetch(request())).status, 503);
 } finally {
@@ -369,6 +382,8 @@ try {
   else process.env.APPS_SCRIPT_URL = previousScript;
   if (previousPolicy === undefined) delete process.env.VITE_PRIVACY_POLICY_URL;
   else process.env.VITE_PRIVACY_POLICY_URL = previousPolicy;
+  if (previousSiteUrl === undefined) delete process.env.VITE_SITE_URL;
+  else process.env.VITE_SITE_URL = previousSiteUrl;
   globalThis.fetch = originalFetch;
 }
 

@@ -50,7 +50,7 @@ Regression checks: `node scripts/test-inquiry.mjs`, `node scripts/test-google-ap
 Human verification is currently removed at the owner's request. No CAPTCHA keys or tokens are required. Consent, Privacy Policy configuration, server validation, the origin check, honeypot, deduplication, and existing sending limits remain active.
 
 1. In **Vercel > Project > Settings > Environment Variables**, add **`INQUIRY_SECRET`** with the exact same value configured under **Apps Script > Project Settings > Script properties**. Use at least 32 random characters. Keep this value out of chat, source control, and any `VITE_` variables.
-2. Enable the variable for the intended Vercel environments and redeploy. Set `APPS_SCRIPT_URL` only if you want to override the URL already in `api/inquiry.js`.
+2. Set `VITE_SITE_URL` to the public HTTPS website origin visitors use (for this deployment, `https://katrina-jota-real-estate-v8vp.vercel.app`). The API uses this value for its origin check because Vercel's request URL can differ from the public alias. Set `VITE_PRIVACY_POLICY_URL` to the approved published policy URL. Enable the variables for the intended Vercel environments and redeploy. Set `APPS_SCRIPT_URL` only if you want to override the URL already in `api/inquiry.js`.
 3. Keep the Apps Script web app configured to execute as its owner and accept access from Anyone. Its handler still requires the secret.
 4. Visit `/contact` on the Vercel deployment and click **Send Inquiry** after entering your details. For local testing without Vercel, use the instructions below.
 5. Submit a real inquiry you control and verify receipt at **rozelramos17@gmail.com**, the reply address, and the email layout. Actual delivery has not been tested from this workspace.

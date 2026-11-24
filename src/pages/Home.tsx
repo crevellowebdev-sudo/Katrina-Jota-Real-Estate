@@ -83,7 +83,7 @@ export default function Home() {
         <HomeScrollReveal className="home-story-portrait" distance={56}>
           <figure>
             <div className="home-photo-window home-story-portrait-window">
-              <img src="/images/katrina-portrait-800.webp" srcSet="/images/katrina-portrait-480.webp 480w, /images/katrina-portrait-800.webp 800w, /images/katrina-portrait-1365.webp 1365w" sizes="(max-width: 700px) 80vw, 38vw" alt="Katrina Jota, wearing glasses and a black blazer" width={800} height={1200} loading="lazy" decoding="async" />
+              <img src="/images/katrina-portrait-800.webp" srcSet="/images/katrina-portrait-480.webp 480w, /images/katrina-portrait-800.webp 800w, /images/katrina-portrait-1365.webp 1365w" sizes="(max-width: 700px) min(400px, 89vw), (max-width: 1100px) 41vw, 480px" alt="Katrina Jota, wearing glasses and a black blazer" width={800} height={1200} loading="lazy" decoding="async" />
             </div>
             <figcaption>Katrina Jota</figcaption>
           </figure>

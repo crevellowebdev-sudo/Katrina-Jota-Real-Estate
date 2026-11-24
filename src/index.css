@@ -784,10 +784,10 @@ main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
 @keyframes home-cinematic-scroll { from { transform: translateY(-100%); } to { transform: translateY(250%); } }
 .home-story { position: relative; isolation: isolate; overflow: hidden; padding-block: clamp(88px, 10vw, 160px); background: var(--color-ivory); }
 .home-story-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: clamp(64px, 10vw, 150px); align-items: center; max-width: 1180px; }
-.home-story-portrait { grid-column: 2; grid-row: 1; position: relative; margin: 0; padding: 0 24px 0 0; }
-.home-story-portrait::before { content: ''; position: absolute; z-index: -1; inset: -20px 0 72px 24px; border: 1px solid var(--color-gold); border-radius: 280px 280px 0 0; }
-.home-story-portrait-window { border-radius: 280px 280px 0 0; }
-.home-story-portrait img { width: 100%; height: auto; }
+.home-story-portrait { grid-column: 2; grid-row: 1; position: relative; min-width: 0; margin: 0; }
+/* A square gallery mat keeps the full portrait visible. */
+.home-story-portrait-window { --portrait-mat: clamp(8px, 1.2vw, 14px); padding: var(--portrait-mat); border: 1px solid var(--color-gold); border-radius: 0; background: var(--color-white); }
+.home-story-portrait img { width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 0; }
 .home-story-portrait figcaption { display: flex; align-items: center; justify-content: end; gap: 24px; margin-top: 24px; color: var(--color-green); font: italic 600 30px/1.2 var(--font-display); }
 .home-story-portrait figcaption::before { content: ''; height: 1px; width: 70px; background: var(--color-gold); }
 .home-story-copy { grid-column: 1; grid-row: 1; min-width: 0; }
@@ -811,10 +811,7 @@ main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .home-redesign .home-photo-window img { transition: scale 1s var(--ease); }
   .home-redesign .home-photo-window:hover img { scale: 1.035; }
-  .home-redesign .home-story-portrait::before { transition: translate .7s var(--ease); }
-  .home-redesign .home-story-portrait:hover::before { translate: 5px -5px; }
-  .home-redesign .home-story-portrait figcaption { transition: translate .5s var(--ease); }
-  .home-redesign .home-story-portrait:hover figcaption { translate: -5px 0; }
+  .home-redesign .home-story-portrait-window:hover img { scale: 1; }
 }
 @media (min-width: 1600px) { .home-cinematic-content { max-width: 1520px; } }
 @media (max-width: 900px) {
@@ -825,7 +822,6 @@ main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
 @media (min-width: 701px) and (max-width: 1100px) {
   .home-cinematic-shade { background: linear-gradient(180deg, rgb(1 20 11 / .7) 0%, rgb(1 20 11 / .18) 26%, rgb(1 20 11 / .1) 46%, rgb(1 20 11 / .72) 80%, rgb(1 20 11 / .93) 100%), linear-gradient(90deg, rgb(1 20 11 / .72) 0%, rgb(1 20 11 / .3) 52%, rgb(1 20 11 / .08) 100%); }
   .home-story-layout { gap: 48px; }
-  .home-story-portrait { padding-right: 16px; }
   .home-story-detail { width: 74%; }
 }
 @media (min-width: 701px) and (max-width: 900px) and (max-height: 650px) {
@@ -860,14 +856,14 @@ main :is(h1, h2, h3, p) { overflow-wrap: break-word; }
   .home-cinematic-foot { display: none; }
   .home-story { padding-block: 68px 76px; }
   .home-story-layout { grid-template-columns: minmax(0, 1fr); gap: 48px; }
-  .home-story-portrait { grid-column: 1; grid-row: 1; width: 88%; max-width: 400px; justify-self: center; padding-right: 16px; }
-  .home-story-portrait::before { inset: -14px 0 60px 18px; }
+  .home-story-portrait { grid-column: 1; grid-row: 1; width: 100%; max-width: 400px; justify-self: center; }
   .home-story-portrait figcaption { font-size: 28px; gap: 18px; }
   .home-story-portrait figcaption::before { width: 44px; }
   .home-story-copy { grid-column: 1; grid-row: 2; }
   .home-story-copy::before { margin-bottom: 26px; }
-  .home-story-description { margin-top: 24px; line-height: 1.85; }
-  .home-story-detail { width: 70%; max-width: 330px; margin-top: 28px; }
+  .home-story-description { margin-top: 24px; line-height: 1.85; text-align: justify; text-align-last: start; hyphens: auto; }
+  .home-story-detail { width: 100%; max-width: none; margin: 28px 0 0; padding: 0 0 12px; }
+  .home-story-detail::before { inset: 12px 0 0 12px; }
 }
 @media (max-width: 360px) { .home-gallery h1 { font-size: 54px; } }
 @media (prefers-reduced-motion: reduce) {
